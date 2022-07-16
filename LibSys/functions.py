@@ -41,13 +41,37 @@ class Store:
     def ListAll():
         
         Database = SysDB.Retrieve()
+        List = [["ID", "Book Title", "Author", "Subject"]]
         
         if Database.keys():
             for ID in Database:
-                List = []
                 List.append([ID, Database[ID]["BookTitle"], Database[ID]["Author"], Database[ID]["Subject"]])
                 
             return List
+        
+    def Search(ID = None, BookTitle = None, Author = None, Subject = None):
+        
+        Database = SysDB.Retrieve()
+        List = [["ID", "Book Title", "Author", "Subject"]]
+        
+        if ID != None:
+            for DBID in Database.keys():
+                if ID == DBID:
+                    List.append([DBID, Database[DBID]["BookTitle"], Database[DBID]["Author"], Database[DBID]["Subject"]])
+                    
+        if (BookTitle != None) or (Author != None) or (Subject != None):
+            for DBID in Database.keys():
+                if BookTitle == Database[DBID]["BookTitle"]:
+                    List.append([DBID, Database[DBID]["BookTitle"], Database[DBID]["Author"], Database[DBID]["Subject"]])
+                    
+                if Author == Database[DBID]["Author"]:
+                    List.append([DBID, Database[DBID]["BookTitle"], Database[DBID]["Author"], Database[DBID]["Subject"]])
+                    
+                if Subject == Database[DBID]["Subject"]:
+                    List.append([DBID, Database[DBID]["BookTitle"], Database[DBID]["Author"], Database[DBID]["Subject"]])
+                    
+        return List
+                    
         
      
 class SysDB:
