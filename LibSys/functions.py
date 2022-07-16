@@ -20,9 +20,23 @@ class Store:
                 "Author": Author,
                 "Subject": Subject
                             }
+        
+        if ID in Database.keys():
+            raise Exception("The item exists already")
             
         SysDB.Dump(Database)
         
+    def Delete(ID):
+        
+        Database = SysDB.Retrieve()
+        
+        if ID in Database.keys():
+            Database.pop(ID)
+            
+        if ID not in Database.keys():
+            raise Exception("The item does not exist")
+            
+        SysDB.Dump(Database)
         
 class SysDB:
     
