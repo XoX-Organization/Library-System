@@ -21,7 +21,7 @@ class Store:
                 "Subject": Subject
                             }
         
-        if ID in Database.keys():
+        elif ID in Database.keys():
             raise Exception("The item exists already")
             
         SysDB.Dump(Database)
@@ -33,11 +33,23 @@ class Store:
         if ID in Database.keys():
             Database.pop(ID)
             
-        if ID not in Database.keys():
+        elif ID not in Database.keys():
             raise Exception("The item does not exist")
             
         SysDB.Dump(Database)
         
+    def ListAll():
+        
+        Database = SysDB.Retrieve()
+        
+        if Database.keys():
+            for ID in Database:
+                List = []
+                List.append([ID, Database[ID]["BookTitle"], Database[ID]["Author"], Database[ID]["Subject"]])
+                
+            return List
+        
+     
 class SysDB:
     
     def __init__(self):
