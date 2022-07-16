@@ -4,9 +4,9 @@
 
 from functions import Store
 from tabulate import tabulate
-import platform
 import os
-
+import time
+import platform
 
 class FuncUtils:
     
@@ -49,13 +49,11 @@ def main():
                     Subject = input("Insert the subject name : ")
                     
                     Store.Insert(ID, BookTitle, Author, Subject)
+                    time.sleep(4)
                     continue
                 
                 except KeyboardInterrupt:
                     break
-                except Exception as e:
-                    input(f"{e}\nPress enter to continue...")
-                    continue
 
         if Option == "2":
             while True:
@@ -65,45 +63,33 @@ def main():
                     ID = input("Insert the book ID : ")
                 
                     Store.Delete(ID)
+                    time.sleep(4)
                     continue
                 
                 except KeyboardInterrupt:
                     break
-                except Exception as e:
-                    input(f"{e}\nPress enter to continue...")
-                    continue
 
         if Option == "3":
             while True:
-                try:
-                    FuncUtils().Cls()
-                    List = Store.ListAll()
-                    
-                    print(tabulate(List, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
-                    input("Press Enter to continue...")
-                    break
+                FuncUtils().Cls()
+                List = Store.ListAll()
                 
-                except Exception as e:
-                    input(f"{e}\nPress enter to continue...")
-                    continue
+                print(tabulate(List, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                input("Press Enter to continue...")
+                break
             
         if Option == "4":
             while True:
-                try:
-                    FuncUtils().Cls()
-                    ID = input("Insert the book ID : ")
-                    BookTitle = input("Insert the book title : ")
-                    Author = input("Insert the author name : ")
-                    Subject = input("Insert the subject name : ")
-                    
-                    List = Store.Search(ID = ID, BookTitle = BookTitle, Author = Author, Subject = Subject)
-                    print(tabulate(List, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
-                    input("Press Enter to continue...")
-                    break
+                FuncUtils().Cls()
+                ID = input("Insert the book ID : ")
+                BookTitle = input("Insert the book title : ")
+                Author = input("Insert the author name : ")
+                Subject = input("Insert the subject name : ")
                 
-                except Exception as e:
-                    input(f"{e}\nPress enter to continue...")
-                    continue
+                List = Store.Search(ID = ID, BookTitle = BookTitle, Author = Author, Subject = Subject)
+                print(tabulate(List, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                input("Press Enter to continue...")
+                break
                 
         if Option.upper() == "Q":
             break
