@@ -2,6 +2,16 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 ### Python ###
+
+
+# Program produced files
+*.json
+
+
+
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
