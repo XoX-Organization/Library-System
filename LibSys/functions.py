@@ -20,6 +20,37 @@ ConsoleFormat = logging.Formatter('%(message)s')
 Console.setFormatter(ConsoleFormat)
 logging.getLogger().addHandler(Console)
 
+
+class Authentication:        
+    
+    def __init__(self, Username, Password):
+        self.Database = SysDB.EmployeeRetrieve()
+        self.Username = Username
+        self.Password = Password
+        
+    def CheckExists(Username):
+        return bool(Username in SysDB.EmployeeRetrieve().keys())
+        
+    def Login(self):
+        AuthLogin = logging.getLogger("AuthLogin	")
+        
+        if self.Password == self.Database[self.Username]["Password"]:
+            AuthLogin.info(f"Login successful as user {self.Username}")
+            return True
+        
+        elif self.Password != self.Database[self.Username]["Password"]:
+            AuthLogin.warning(f"Login failed as user {self.Username}")
+            return False
+    
+    def Register(self):
+        AuthRegister = logging.getLogger("AuthRegister	")
+        
+        self.Database[self.Username] = {"Password": self.Password}
+        SysDB.EmployeeDump(self.Database)
+        AuthRegister.info(f"Registration successful as user {self.Username}")
+        
+        return True
+
 class Store:
     
     def __init__(self):
@@ -28,7 +59,7 @@ class Store:
     def Insert(ID, BookTitle, Author, Subject):
         StoreInsertion = logging.getLogger("StoreInsertion	")
         
-        Database = SysDB.Retrieve()
+        Database = SysDB.StoreRetrieve()
         
         if ID not in Database.keys():
             Database[ID] = {
@@ -41,12 +72,12 @@ class Store:
         elif ID in Database.keys():
             StoreInsertion.warning(f"ID: {ID} is existing, thus will not be added")
             
-        SysDB.Dump(Database)
+        SysDB.StoreDump(Database)
         
     def Delete(ID):
         StoreDeletion = logging.getLogger("StoreDeletion	")
         
-        Database = SysDB.Retrieve()
+        Database = SysDB.StoreRetrieve()
         
         if ID in Database.keys():
             Database.pop(ID)
@@ -55,12 +86,12 @@ class Store:
         elif ID not in Database.keys():
             StoreDeletion.warning(f"ID:{ID} does not exist")
             
-        SysDB.Dump(Database)
+        SysDB.StoreDump(Database)
         
     def ListAll():
         StoreListFunc = logging.getLogger("StoreListFunc	")
         
-        Database = SysDB.Retrieve()
+        Database = SysDB.StoreRetrieve()
         List = [["ID", "Book Title", "Author", "Subject"]]
         
         if Database.keys():
@@ -73,7 +104,7 @@ class Store:
     def Search(ID = None, BookTitle = None, Author = None, Subject = None):
         StoreSearchFunc = logging.getLogger("StoreSearchFunc	")
         
-        Database = SysDB.Retrieve()
+        Database = SysDB.StoreRetrieve()
         List = [["ID", "Book Title", "Author", "Subject"]]
         ListID = []
         
@@ -100,36 +131,108 @@ class SysDB:
     def __init__(self):
         pass
     
-    def Retrieve():
-        SysDBRetrieve = logging.getLogger("SysDBRetrieve	")
+    def StoreRetrieve():
+        SysDBStoreRetrieve = logging.getLogger("SysDBStoreRetrieve	")
         
         try:
-            if os.stat("Database.json").st_size != 0:
-                with open("Database.json", "r", encoding = "UTF-8") as f:
+            if os.stat("Store-DB.json").st_size != 0:
+                with open("Store-DB.json", "r", encoding = "UTF-8") as f:
                     JSON = json.load(f)
-                    SysDBRetrieve.debug("Database.json has been successfully loaded")
+                    SysDBStoreRetrieve.debug("Store-DB.json has been successfully loaded")
                     return JSON
             else:
-                SysDBRetrieve.debug("Database.json is empty, will return {} value back to the requester to avoid JSONDecodeError")
+                SysDBStoreRetrieve.debug("Store-DB.json is empty, will return {} value back to the requester to avoid JSONDecodeError")
                 return {}
             
         except FileNotFoundError:
-            SysDBRetrieve.debug("Database.json is not exists, will create a new Database.json file")
-            open("Database.json", "w+", encoding = "UTF-8")
+            SysDBStoreRetrieve.debug("Store-DB.json is not exists, will create a new Store-DB.json file")
+            open("Store-DB.json", "w+", encoding = "UTF-8")
             return {}
         
         except json.decoder.JSONDecodeError:
-            SysDBRetrieve.critical("Database.json has corrupted, please contact professional to fix it")
+            SysDBStoreRetrieve.critical("Store-DB.json has corrupted, please contact professional to fix it")
             sys.exit(1)
             
         
-    def Dump(Database):
-        SysDBDump = logging.getLogger("SysDBDump	")
+    def StoreDump(Database):
+        SysDBStoreDump = logging.getLogger("SysDBStoreDump	")
         
-        SysDB.Retrieve()
+        SysDB.StoreRetrieve()
         
-        with open("Database.json", "w", encoding = "UTF-8") as f:
+        with open("Store-DB.json", "w", encoding = "UTF-8") as f:
             json.dump(Database, f, indent = 4, ensure_ascii = False, sort_keys = False)
-            SysDBDump.debug("The data has been successfully saved")
+            SysDBStoreDump.debug("The data has been successfully saved")
+            
+            
+    #---------------------------------------------------------------------------------------------------#
+            
+                
+    def EmployeeRetrieve():
+        SysDBEmployeeRetrieve = logging.getLogger("SysDBEmployeeRetrieve	")
+        
+        try:
+            if os.stat("Employee-DB.json").st_size != 0:
+                with open("Employee-DB.json", "r", encoding = "UTF-8") as f:
+                    JSON = json.load(f)
+                    SysDBEmployeeRetrieve.debug("Employee-DB.json has been successfully loaded")
+                    return JSON
+            else:
+                SysDBEmployeeRetrieve.debug("Employee-DB.json is empty, will return {} value back to the requester to avoid JSONDecodeError")
+                return {}
+            
+        except FileNotFoundError:
+            SysDBEmployeeRetrieve.debug("Employee-DB.json is not exists, will create a new Employee-DB.json file")
+            open("Employee-DB.json", "w+", encoding = "UTF-8")
+            return {}
+        
+        except json.decoder.JSONDecodeError:
+            SysDBEmployeeRetrieve.critical("Employee-DB.json has corrupted, please contact professional to fix it")
+            sys.exit(1)
+            
+        
+    def EmployeeDump(Database):
+        SysDBEmployeeDump = logging.getLogger("SysDBEmployeeDump	")
+        
+        SysDB.EmployeeRetrieve()
+        
+        with open("Employee-DB.json", "w", encoding = "UTF-8") as f:
+            json.dump(Database, f, indent = 4, ensure_ascii = False, sort_keys = False)
+            SysDBEmployeeDump.debug("The data has been successfully saved")
+                
+            
+    #---------------------------------------------------------------------------------------------------#
+            
+                
+    def MemberRetrieve():
+        SysDBMemberRetrieve = logging.getLogger("SysDBMemberRetrieve	")
+        
+        try:
+            if os.stat("Member-DB.json").st_size != 0:
+                with open("Member-DB.json", "r", encoding = "UTF-8") as f:
+                    JSON = json.load(f)
+                    SysDBMemberRetrieve.debug("Member-DB.json has been successfully loaded")
+                    return JSON
+            else:
+                SysDBMemberRetrieve.debug("Member-DB.json is empty, will return {} value back to the requester to avoid JSONDecodeError")
+                return {}
+            
+        except FileNotFoundError:
+            SysDBMemberRetrieve.debug("Member-DB.json is not exists, will create a new Member-DB.json file")
+            open("Member-DB.json", "w+", encoding = "UTF-8")
+            return {}
+        
+        except json.decoder.JSONDecodeError:
+            SysDBMemberRetrieve.critical("Member-DB.json has corrupted, please contact professional to fix it")
+            sys.exit(1)
+            
+        
+    def MemberDump(Database):
+        SysDBMemberDump = logging.getLogger("SysDBMemberDump	")
+        
+        SysDB.MemberRetrieve()
+        
+        with open("Member-DB.json", "w", encoding = "UTF-8") as f:
+            json.dump(Database, f, indent = 4, ensure_ascii = False, sort_keys = False)
+            SysDBMemberDump.debug("The data has been successfully saved")
                 
         
