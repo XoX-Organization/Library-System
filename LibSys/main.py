@@ -2,7 +2,7 @@
 # Programmer : Xian Yee
 # Version : 0.0.0
 
-from functions import Store, Authentication
+from LibSys.functions import Store, Authentication, Member
 from tabulate import tabulate
 from getpass import getpass
 from distutils.util import strtobool
