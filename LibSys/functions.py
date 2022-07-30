@@ -2,11 +2,11 @@
 # Programmer : Xian Yee
 # Version : 0.0.0
 
-import os
-import sys
 import json
 import logging
-
+import os
+import sys
+from datetime import datetime
 
 logging.basicConfig(level = logging.DEBUG,
                     format = '%(asctime)s %(name)s %(levelname)s %(message)s',
@@ -16,82 +16,83 @@ logging.basicConfig(level = logging.DEBUG,
 
 Console = logging.StreamHandler()
 Console.setLevel(logging.INFO)
-ConsoleFormat = logging.Formatter('%(message)s')
-Console.setFormatter(ConsoleFormat)
+console_format = logging.Formatter('%(message)s')
+Console.setFormatter(console_format)
 logging.getLogger().addHandler(Console)
 
 
 class Authentication:        
     
     def __init__(self, Username, Password):
-        self.Database = SysDB.EmployeeRetrieve()
-        self.Username = Username
-        self.Password = Password
+        self.database = SysDB.EmployeeRetrieve()
+        self.username = Username
+        self.password = Password
         
-    def CheckExists(Username):
+    def check_user(Username):
         return bool(Username in SysDB.EmployeeRetrieve().keys())
         
     def Login(self):
         AuthLogin = logging.getLogger("AuthLogin	")
         
-        if self.Password == self.Database[self.Username]["Password"]:
-            AuthLogin.info(f"Login successful as user {self.Username}")
+        if self.password == self.database[self.username]["Password"]:
+            AuthLogin.info(f"Login successful as user {self.username}")
             return True
         
-        elif self.Password != self.Database[self.Username]["Password"]:
-            AuthLogin.warning(f"Login failed as user {self.Username}")
+        elif self.password != self.database[self.username]["Password"]:
+            AuthLogin.warning(f"Login failed as user {self.username}")
             return False
     
     def Register(self):
         AuthRegister = logging.getLogger("AuthRegister	")
         
-        self.Database[self.Username] = {"Password": self.Password}
-        SysDB.EmployeeDump(self.Database)
-        AuthRegister.info(f"Registration successful as user {self.Username}")
+        self.database[self.username] = {"Password": self.password}
+        SysDB.EmployeeDump(self.database)
+        AuthRegister.info(f"Registration successful and logged in as user {self.username}")
         
         return True
 
 class Store:
     
-    def __init__(self):
-        pass
+    def __init__(self, ID):
+        self.id = ID
+        self.database = SysDB.StoreRetrieve()
     
-    def Insert(ID, BookTitle, Author, Subject):
+    def Insert(self, BookTitle, Author, Subject):
         StoreInsertion = logging.getLogger("StoreInsertion	")
         
-        Database = SysDB.StoreRetrieve()
-        
-        if ID not in Database.keys():
-            Database[ID] = {
+        if self.id not in self.database.keys():
+            Database[self.id] = {
                 "BookTitle": BookTitle,
                 "Author": Author,
                 "Subject": Subject
                             }
-            StoreInsertion.info(f"ID: {ID}, BookTitle: {BookTitle}, Author: {Author}, Subject: {Subject} has been added successfully")
+            StoreInsertion.info(f"ID: {self.id}, BookTitle: {BookTitle}, Author: {Author}, Subject: {Subject} has been added successfully")
         
-        elif ID in Database.keys():
-            StoreInsertion.warning(f"ID: {ID} is existing, thus will not be added")
+        elif self.id in self.database.keys():
+            StoreInsertion.warning(f"ID: {self.id} is existing, thus will not be added")
             
-        SysDB.StoreDump(Database)
+        SysDB.StoreDump(self.database)
         
-    def Delete(ID):
+    def Modify(self, BookTitle, Author, Subject):
+        pass
+        
+    def Delete(self):
         StoreDeletion = logging.getLogger("StoreDeletion	")
         
-        Database = SysDB.StoreRetrieve()
-        
-        if ID in Database.keys():
-            Database.pop(ID)
+        if self.id in self.database.keys():
+            self.database.pop(self.id)
             StoreDeletion.info(f"ID:{ID} has been deleted successfully")
             
-        elif ID not in Database.keys():
+        elif self.id not in self.database.keys():
             StoreDeletion.warning(f"ID:{ID} does not exist")
             
-        SysDB.StoreDump(Database)
+        SysDB.StoreDump(self.database)
         
     def ListAll():
         StoreListFunc = logging.getLogger("StoreListFunc	")
         
         Database = SysDB.StoreRetrieve()
+
         List = [["ID", "Book Title", "Author", "Subject"]]
         
         if Database.keys():
@@ -101,31 +102,101 @@ class Store:
             StoreListFunc.info("All the items retrieved successfully")
             return List
         
-    def Search(ID = None, BookTitle = None, Author = None, Subject = None):
+    def Search(*keywords):
+        
         StoreSearchFunc = logging.getLogger("StoreSearchFunc	")
         
         Database = SysDB.StoreRetrieve()
+
         List = [["ID", "Book Title", "Author", "Subject"]]
         ListID = []
         
-        if (ID != None) or (BookTitle != None) or (Author != None) or (Subject != None):
-            StoreSearchFunc.info(f"Given ID: {ID}, BookTitle: {BookTitle}, Author: {Author}, Subject: {Subject}, searching for similar item")
-            
-            for DBID, DBInfo in Database.items():
-                for i in DBInfo:
-                    if (ID in DBID) or (BookTitle in DBInfo[i]) or (Author in DBInfo[i]) or (Subject in DBInfo[i]):
+        StoreSearchFunc.info(f"Given keywords: {keywords}, searching for similar item")
+        
+        for DBID, DBInfo in Database.items():
+            for i in DBInfo:
+                for y in keywords:
+                    if (y in DBID) or (y in DBInfo[i]):
                         if DBID not in ListID:
                             ListID.append(DBID)
-                        
-            for x in ListID:
-                List.append([x, Database[x]["BookTitle"], Database[x]["Author"], Database[x]["Subject"]])
-                        
-            StoreSearchFunc.info(f"Finished searching by given ID: {ID}, BookTitle: {BookTitle}, Author: {Author}, Subject: {Subject}")
+                    
+        for x in ListID:
+            List.append([x, Database[x]["BookTitle"], Database[x]["Author"], Database[x]["Subject"]])
+                    
+        StoreSearchFunc.info(f"Finished searching by given keywords: {keywords}")
                     
         return List
                     
         
-     
+class Member:
+    
+    def __init__(self, id):
+        self.database = SysDB.MemberRetrieve()
+        self.id = id
+    
+    def Modify(self, Key, Value):
+        if self.id in self.database.keys():
+
+            if Key.upper() in ("ANNUAL-FEE", "ANNUALFEE", "0"):
+                self.database[self.id]["Annual-Fee"] = Value
+                
+            if Key.upper() in ("CLASS", "1"):
+                self.database[self.id]["Class"] = Value
+                
+            if Key.upper() in ("MEMBERSHIP-STATUS","MEMBERSHIPSTATUS", "2"):
+                self.database[self.id]["MembershipStatus"] = Value
+                
+            if Key.upper() in ("MEMBERSHIP-TYPE, ""MEMBERSHIPTYPE", "3"):
+                self.database[self.id]["MembershipType"] = Value
+                
+            if Key.upper() in ("NAME", "4"):
+                self.database[self.id]["Name"] = Value
+                
+            if Key.upper() in ("ONE-TIME-DEPOSIT", "ONETIMEDEPOSIT", "5"):
+                self.database[self.id]["OneTimeDeposit"] = Value
+                
+            if Key.upper() in ("PENALTY", "6"):
+                self.database[self.id]["Penalty"] = Value
+                
+            if Key.upper() in ("RENEWAL-DATE", "RENEWALDATE", "7"):
+                self.database[self.id]["RenewalDate"] = Value
+                
+        elif self.id not in self.database.keys():
+            pass
+        
+        SysDB.MemberDump(self.database)
+    
+    def Create(self):
+        self.database[self.id] = {
+            "Annual-Fee": None,
+            "Class": None,
+            "Creation-Date": str(datetime.now()),
+            "Entitlement": {
+            },
+            "Membership-Status": None,
+            "Membership-Type": None,
+            "Name": None,
+            "One-Time-Deposit": None,
+            "Penalty": None,
+            "Renewal-Date": None
+        }
+        
+        SysDB.MemberDump(self.database)
+        
+    def Read(self):
+        List = [["Key", "Value"]]
+        
+        for key, value in self.database[self.id].items():
+            List.append([key, value])
+        
+        return List
+    
+    def Delete(self):
+        self.database.pop(self.id)
+        
+        SysDB.MemberDump(self.database)
+    
+    
 class SysDB:
     
     def __init__(self):

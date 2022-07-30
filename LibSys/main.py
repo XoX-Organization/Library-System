@@ -2,7 +2,7 @@
 # Programmer : Xian Yee
 # Version : 0.0.0
 
-from LibSys.functions import Store, Authentication
+from LibSys.functions import Store, Authentication, Member
 from tabulate import tabulate
 from getpass import getpass
 from distutils.util import strtobool
@@ -10,151 +10,198 @@ import os
 import time
 import platform
 
-class FuncUtils:
-    
-    def __init__(self):
-        self.Platform = platform.system()
-        self.ASCII_ART = "\n\t╭╮╱╱╭━━┳━━╮╭━━━┳━━━┳━━━┳╮╱╱╭╮╱╱╱╱╱╱╱╱╭╮\n\t┃┃╱╱╰┫┣┫╭╮┃┃╭━╮┃╭━╮┃╭━╮┃╰╮╭╯┃╱╱╱╱╱╱╱╭╯╰╮\n\t┃┃╱╱╱┃┃┃╰╯╰┫╰━╯┃┃╱┃┃╰━╯┣╮╰╯╭┻━┳╮╱╭┳━┻╮╭╋━━┳╮╭╮\n\t┃┃╱╭╮┃┃┃╭━╮┃╭╮╭┫╰━╯┃╭╮╭╯╰╮╭┫━━┫┃╱┃┃━━┫┃┃┃━┫╰╯┃\n\t┃╰━╯┣┫┣┫╰━╯┃┃┃╰┫╭━╮┃┃┃╰╮╱┃┃┣━━┃╰━╯┣━━┃╰┫┃━┫┃┃┃\n\t╰━━━┻━━┻━━━┻╯╰━┻╯╱╰┻╯╰━╯╱╰╯╰━━┻━╮╭┻━━┻━┻━━┻┻┻╯\n\t╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╭━╯┃\n\t╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╰━━╯\n"
 
-    def Cls(self, PrintUser = True):
-        if self.Platform == 'Windows':
-            os.system("cls")
-            print(self.ASCII_ART)
-            if PrintUser:
-                print(f"\tLogged in as {Username}\n")
-                
-        elif self.Platform in ('Darwin', 'Linux'):
-            os.system("clear")
-            print(self.ASCII_ART)
-            if PrintUser:
-                print(f"\tLogged in as {Username}\n")
+def cls(print_login = True):
+    os_name = platform.system()
+    ascii_art = "\n\t╭╮╱╱╭━━┳━━╮╭━━━┳━━━┳━━━┳╮╱╱╭╮╱╱╱╱╱╱╱╱╭╮\n\t┃┃╱╱╰┫┣┫╭╮┃┃╭━╮┃╭━╮┃╭━╮┃╰╮╭╯┃╱╱╱╱╱╱╱╭╯╰╮\n\t┃┃╱╱╱┃┃┃╰╯╰┫╰━╯┃┃╱┃┃╰━╯┣╮╰╯╭┻━┳╮╱╭┳━┻╮╭╋━━┳╮╭╮\n\t┃┃╱╭╮┃┃┃╭━╮┃╭╮╭┫╰━╯┃╭╮╭╯╰╮╭┫━━┫┃╱┃┃━━┫┃┃┃━┫╰╯┃\n\t┃╰━╯┣┫┣┫╰━╯┃┃┃╰┫╭━╮┃┃┃╰╮╱┃┃┣━━┃╰━╯┣━━┃╰┫┃━┫┃┃┃\n\t╰━━━┻━━┻━━━┻╯╰━┻╯╱╰┻╯╰━╯╱╰╯╰━━┻━╮╭┻━━┻━┻━━┻┻┻╯\n\t╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╭━╯┃\n\t╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╱╰━━╯\n"
+    if os_name == 'Windows':
+        os.system("cls")
+        print(ascii_art)
+        if print_login:
+            print(f"\tLogged in as {username}\n")
+            
+    elif os_name in ('Darwin', 'Linux'):
+        os.system("clear")
+        print(ascii_art)
+        if print_login:
+            print(f"\tLogged in as {username}\n")
 
 
 def main():
     
     while True:
         
-        '''
-        Section Login System:
-        The user will be prompted for login credential before using this program.
-        '''
-        global Username
+        global username
         
-        FuncUtils().Cls(PrintUser = False)
+        cls(print_login = False)
         
-        Username = input("Please enter your username: ")
+        username = input("Please enter your username: ")
         
-        if Authentication.CheckExists(Username):
+        if Authentication.check_user(username):
             print("Tip: If you can't see what password you entered, it's normal not bug :D\n")
-            Password = getpass("Please enter your password: ")
-            Auth = Authentication(Username, Password).Login()
-            if Auth == True:
+            password = getpass("Please enter your password: ")
+            auth_pass = Authentication(username, password).Login()
+            if auth_pass == True:
                 pass
-            elif Auth == False:
+            elif auth_pass == False:
                 input("You had entered an incorrect password. Please try again\nPress <Enter> to continue...")
                 continue
             
-        elif not Authentication.CheckExists(Username):
+        elif not Authentication.check_user(username):
             
             try:
-                RegConf = strtobool(input("The username is not exist, do you want to register?: (Y/N) "))
+                register_confirmation = strtobool(input("The username is not exist, do you want to register?: (Y/N) "))
             except ValueError:
                 continue
             
-            if RegConf:
+            if register_confirmation:
                 print("Tip: If you can't see what password you entered, it's normal not bug :D\n")
-                Password = getpass("Please make a password: ")
-                Password2nd = getpass("Please confirm your password: ")
+                password = getpass("Please make a password: ")
+                password2nd = getpass("Please confirm your password: ")
                 
-                if Password == Password2nd:
-                    Authentication(Username, Password).Register()
+                if password == password_confirmation:
+                    Authentication(username, password).Register()
                     print("You have successfully registered")
                     time.sleep(3)
                     
-                elif Password != Password2nd:
+                elif password != password_confirmation:
                     input("The confirmation password not match the previous password\nPress <Enter> to continue...")
                     continue
                 
-            elif not RegConf:
+            elif not register_confirmation:
                 continue
                 
                 
                 
         while True:
             
-            '''
-            Section Main
-            '''
+            cls()
+            print("\tFree to contribute on https://github.com/KimAssignment/Library-System\n")
             
-        
-            FuncUtils().Cls()
-            print("\tFree to contribute on https://github.com/victoryy2003/Library-System\n")
-            print("\t1. Create entry")
-            print("\t2. Delete entry")
-            print("\t3. List all entries")
-            print("\t4. Search entry")
+            print("\t1. Store System")
+            print("\t2. Member System")
             
-            print("\tQ. Log Out")
-            
+            print("\n\tQ. Log Out")
+            option = input("\nChoose an option: ")
 
-            Option = input("\nChoose an option: ")
-
-            if Option == "1":
+            if option == "1":
                 while True:
-                    try:
-                        FuncUtils().Cls()
-                        print("Tips: Press <CTRL-C> to return to menu\n")
-                        ID = input("Insert the book ID : ")
-                        BookTitle = input("Insert the book title : ")
-                        Author = input("Insert the author name : ")
-                        Subject = input("Insert the subject name : ")
+                    
+                    cls()
+                    print("\t1. Create entry")
+                    print("\t2. Delete entry")
+                    print("\t3. List all entries")
+                    print("\t4. Search entry")
+                    
+                    print("\n\tQ. Back to Main Menu")
+                    
+
+                    option = input("\nChoose an option: ")
+
+                    if option == "1":
+                        while True:
+                            try:
+                                cls()
+                                print("Tip: Press <CTRL-C> to return to menu\n")
+                                id = input("Insert the book ID : ")
+                                book_title = input("Insert the book title : ")
+                                author_name = input("Insert the author name : ")
+                                subject_title = input("Insert the subject name : ")
+                                
+                                Store(id).Insert(book_title, author_name, subject_title)
+                                input("Press <Enter> to continue...")
+                                continue
+                            
+                            except KeyboardInterrupt:
+                                break
+
+                    if option == "2":
+                        while True:
+                            try:
+                                cls()
+                                print("Tip: Press <CTRL-C> to return to menu\n")
+                                id = input("Insert the book ID : ")
+                            
+                                Store(id).Delete()
+                                input("Press <Enter> to continue...")
+                                continue
+                            
+                            except KeyboardInterrupt:
+                                break
+
+                    if option == "3":
+                        while True:
+                            cls()
+                            list = Store.ListAll()
+                            
+                            print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                            input("Press <Enter> to continue...")
+                            break
                         
-                        Store.Insert(ID, BookTitle, Author, Subject)
-                        time.sleep(4)
-                        continue
-                    
-                    except KeyboardInterrupt:
+                    if option == "4":
+                        while True:
+                            cls()
+                            keywords = input("Provide any keyword: (Can be separated by commas) ").split(",")
+                            
+                            list = Store.Search(*keywords)
+                            print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                            input("Press <Enter> to continue...")
+                            break
+                            
+                    if option.upper() == "Q":
                         break
-
-            if Option == "2":
+                    
+            if option == "2":
                 while True:
-                    try:
-                        FuncUtils().Cls()
-                        print("Tips: Press <CTRL-C> to return to menu\n")
-                        ID = input("Insert the book ID : ")
+                    cls()
+                    print("\t1. Create Member entry")
+                    print("\t2. Modify Member entry")
+                    print("\t3. Read Member info")
+            
+                    print("\n\tQ. Back to Main Menu")
+                    option = input("\nChoose an option: ")
                     
-                        Store.Delete(ID)
-                        time.sleep(4)
-                        continue
+                    if option == "1":
+                        cls()
+                        id = input("Insert the member ID: ")
+                        Member(id).Create()
+                        input('\nThe member has been created, Please goto "Modify Member" section for further adjustment.\nPress <Enter> to continue...')
+                        
+                    if option == "2":
+                        try:
+                            cls()
+                            print("Tip: Press <CTRL-C> to return to menu\n")
+                            id = input("Insert the member ID: ")
+                            InitMember = Member(id)
+                            while True:
+                                cls()
+                                list = InitMember.Read()
+                                
+                                p = 0
+                                for i in range(len(list)):
+                                    i = i - p
+                                    if list[i][0] in ("Creation-Date", "Entitlement"):
+                                        list.pop(i)
+                                        p = p + 1
+                                
+                                print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                                key = input("Enter the variable you wish to edit: ")
+                                value = input("Enter the new value: ")
+                                InitMember.Modify(key, value)
+                                
+                        except KeyboardInterrupt:
+                            break
+                        
+                    if option == "3":
+                        cls()
+                        id = input("Insert the member ID: ")
+                        list = Member(id).Read()
+                        print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                        input("Press <Enter> to continue...")
                     
-                    except KeyboardInterrupt:
-                        break
-
-            if Option == "3":
-                while True:
-                    FuncUtils().Cls()
-                    List = Store.ListAll()
-                    
-                    print(tabulate(List, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
-                    input("Press Enter to continue...")
-                    break
-                
-            if Option == "4":
-                while True:
-                    FuncUtils().Cls()
-                    ID = input("Insert the book ID : ")
-                    BookTitle = input("Insert the book title : ")
-                    Author = input("Insert the author name : ")
-                    Subject = input("Insert the subject name : ")
-                    
-                    List = Store.Search(ID = ID, BookTitle = BookTitle, Author = Author, Subject = Subject)
-                    print(tabulate(List, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
-                    input("Press Enter to continue...")
-                    break
-                    
-            if Option.upper() == "Q":
+            if option.upper() == "Q":
                 break
-                    
+                        
                 
 if __name__ == "__main__":
     main()
