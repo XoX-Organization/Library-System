@@ -2,18 +2,18 @@ Library System
 =================
 Install
 -------
-To install Library System:
+To install Library System: (Requirement Python Version >= 3.6)
 ```bash
-pip install "git+https://github.com/victoryy2003/Library-System@master"
+pip install "git+https://github.com/KimAssignment/Library-System@master"
 ```
 
 To update Library System:
 ```bash
-pip install "git+https://github.com/victoryy2003/Library-System@master" --upgrade
+pip install "git+https://github.com/KimAssignment/Library-System@master" --upgrade
 ```
 Usage
 -----
 To use the application, simply run the following command:
 ```bash
-LibSys
+LibrarySystem
 ```
