@@ -102,7 +102,7 @@ def main():
                 
                 
                 # ////////////////////////////////////////////////////////////
-                #                       Common Functions
+                #                       COMMON FUNCTIONS
                 # ////////////////////////////////////////////////////////////
                 
                 
@@ -120,7 +120,7 @@ def main():
                         cls(Print_CTRL_C = True)
                         print("List all section")
                         list = self.system.List()
-                        print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                        if list != False: print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
                         input("Press >ENTER< to continue")
                         return False
                         
@@ -129,7 +129,7 @@ def main():
                         print("Search section")
                         keywords = input("Provide any keywords or phrases (separate with commas): ").split(",")
                         list = self.system.Search(*keywords)
-                        print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
+                        if list != False: print(tabulate(list, headers = "firstrow", tablefmt = "grid", showindex = True, missingval = "N/A"))
                         input("Press >ENTER< to continue")
                         return False
                         
@@ -156,7 +156,7 @@ def main():
                         cls(Print_CTRL_C = True)
                         print("Modify section")
                         list = self.system.List(ID = id, Only_Modifiable = True)
-                        print(tabulate(list, headers = "firstrow", tablefmt = "grid", missingval = "N/A"))
+                        if list != False: print(tabulate(list, headers = "firstrow", tablefmt = "grid", missingval = "N/A"))
                         key = input("Variable you wish to modify: ")
                         value = input("New value: ")
                         self.system(id).Modify(key, value)
@@ -204,7 +204,7 @@ def main():
                     
                     
                 # ////////////////////////////////////////////////////////////
-                #                       Storing System
+                #                       STORING SYSTEM
                 # ////////////////////////////////////////////////////////////
                 
                 
@@ -242,7 +242,7 @@ def main():
                         
                         
                 # ////////////////////////////////////////////////////////////
-                #                       Member System
+                #                       MEMBER SYSTEM
                 # ////////////////////////////////////////////////////////////
                 
                 if option == "2":
@@ -280,7 +280,7 @@ def main():
                         
                         
                 # ////////////////////////////////////////////////////////////
-                #                       Employee System
+                #                       EMPLOYEE SYSTEM
                 # ////////////////////////////////////////////////////////////
                 
                 if option == "3":
@@ -315,21 +315,27 @@ def main():
         
         
     # ////////////////////////////////////////////////////////////
-    #                       End of Program
+    #                       END OF PROGRAM
     # ////////////////////////////////////////////////////////////
         
-        
-    except (Exception, SystemExit) as e:
+    except (Exception) as e:
+        cls()
         logger = get_logger("SystemError")
         logger.error(traceback.format_exc())
-        shutdown()
-        print("\n\nData has been saved in the following path:")
-        print(f"{Path().user_data_roaming_dir}\n\n")
         
-    except KeyboardInterrupt:
+    finally:
         shutdown()
-        print("\n\nData has been saved in the following path:")
-        print(f"{Path().user_data_roaming_dir}\n\n")
+        print("\n\n\tData has been saved in the following path:")
+        print(f"\t{Path().user_data_roaming_dir}\n")
+        print("\n\tSources:")
+        print("\thttps://github.com/KimAssignment/Library-System/\n")
+        print("\n\tBugs and Feature Suggestions:")
+        print("\thttps://github.com/KimAssignment/Library-System/issues\n\n")
+        
+        
+        
+        
+        
         
         
 if __name__ == "__main__":

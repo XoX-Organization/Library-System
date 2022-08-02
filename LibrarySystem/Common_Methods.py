@@ -31,6 +31,8 @@ class Common:
         
         if not self.database.keys():
             logger.warning("Database is empty.")
+            logger = remove_handler(logger)
+            return False
 
         List = []
         SList = ["ID"]
@@ -76,6 +78,10 @@ class Common:
     def Search(self, *keywords):
         logger = get_logger(self.logger_name)
         
+        if keywords == ('',):
+            logger = remove_handler(logger)
+            return False
+        
         if not self.database.keys():
             logger.warning("Database is empty.")
             logger = remove_handler(logger)
@@ -110,6 +116,7 @@ class Common:
         return List
     
     def valid_ID(self, ID):
+        if ID == "": return False
         return bool(ID in self.database.keys())
     
     def Register(self, ID, DATADUMP):
@@ -117,6 +124,10 @@ class Common:
         
         if self.valid_ID(ID):
             logger.info(f"{ID} is existing, thus will not be added")
+            logger = remove_handler(logger)
+            return False
+        
+        if ID == "":
             logger = remove_handler(logger)
             return False
         
@@ -131,6 +142,11 @@ class Common:
         
     def Modify(self, ID, Key, Value):
         logger = get_logger(self.logger_name)
+        
+        if Key == "":
+            logger = remove_handler(logger)
+            return False
+        
         if Value == "":
             Value = None
         
@@ -161,6 +177,10 @@ class Common:
         
     def Delete(self, ID):
         logger = get_logger(self.logger_name)
+        
+        if ID == "":
+            logger = remove_handler(logger)
+            return False
         
         if not self.valid_ID(ID):
             logger.info(f"Invalid {ID}")

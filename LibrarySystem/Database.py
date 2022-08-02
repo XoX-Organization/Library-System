@@ -27,7 +27,6 @@ def valid_JSON(FILE_NAME):
             
         except json.decoder.JSONDecodeError:
             logger.error(traceback.format_exc())
-            logger.error(f"{FILE_NAME} contains corrupted JSON data, contact Administrator to fix it before next launch.")
             shutdown()
             raise SystemExit(1)
         
