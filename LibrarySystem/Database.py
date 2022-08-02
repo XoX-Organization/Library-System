@@ -3,7 +3,7 @@ import os
 import json
 import traceback
 
-from LibrarySystem.Logging import get_logger, remove_handler
+from LibrarySystem.Logging import get_logger, remove_handler, shutdown
 from LibrarySystem.Path import Path
 
 
@@ -28,6 +28,7 @@ def valid_JSON(FILE_NAME):
         except json.decoder.JSONDecodeError:
             logger.error(traceback.format_exc())
             logger.error(f"{FILE_NAME} contains corrupted JSON data, contact Administrator to fix it before next launch.")
+            shutdown()
             raise SystemExit(1)
         
         except FileNotFoundError:

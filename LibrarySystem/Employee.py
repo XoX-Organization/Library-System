@@ -50,18 +50,21 @@ class Employee:
         
         if not Employee(self.ID).valid_ID:
             logger.info(f"Invalid {self.ID}, please register")
+            logger = remove_handler(logger)
             return False
         
         if "BCrypt-Pass" in self.Database[self.ID].keys():
             hashed_pass = self.Database[self.ID]["BCrypt-Pass"]
             if bcrypt.checkpw(password.encode('utf-8'), hashed_pass.encode('utf-8')):
                 logger.info(f"Login successful as user {self.ID}")
+                logger = remove_handler(logger)
                     
                 return True
             
         elif "Password" in self.Database[self.ID].keys() == False:
             if password == self.Database[self.ID]["Password"]:
                 logger.info(f"Login successful as user {self.ID}")
+                logger = remove_handler(logger)
                     
                 return True
         

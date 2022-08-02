@@ -78,6 +78,7 @@ class Common:
         
         if not self.database.keys():
             logger.warning("Database is empty.")
+            logger = remove_handler(logger)
             return False
         
         ListID = []
@@ -116,6 +117,7 @@ class Common:
         
         if self.valid_ID(ID):
             logger.info(f"{ID} is existing, thus will not be added")
+            logger = remove_handler(logger)
             return False
         
         Final = merge(DATADUMP, self.database)
@@ -134,6 +136,7 @@ class Common:
         
         if not self.valid_ID(ID):
             logger.info(f"Invalid {ID}, please register")
+            logger = remove_handler(logger)
             return False
         
         for x in self.database[ID].keys():
@@ -161,6 +164,7 @@ class Common:
         
         if not self.valid_ID(ID):
             logger.info(f"Invalid {ID}")
+            logger = remove_handler(logger)
             return False
         
         del self.database[ID]
