@@ -2,7 +2,9 @@ Library System
 =================
 Install
 -------
-To install Library System: (Requirement Python Version >= 3.6)
+**Requirement Python Version >= 3.6**
+
+To install Library System:
 ```bash
 pip install "git+https://github.com/KimAssignment/Library-System@master"
 ```
@@ -15,7 +17,17 @@ Usage
 -----
 To use the application, simply run the following command:
 ```bash
+LibrarySystem.exe
+```
+The resulting directory structure will be:
+```bash
+C:\Users\User\AppData\Roaming\Kim\LibrarySystem
+
 LibrarySystem
+├── DB_Storing.json
+├── DB_Member.json
+├── DB_Employee.json
+└── system.log
 ```
 
 Usage as a library
@@ -137,9 +149,9 @@ logger = get_logger(LOGGER_NAME)
 # Initialize first by getting a logger handler with replacing LOGGER_NAME variable with a name
 # For example, logger = get_logger("System")
 
-logger.info("This is a info")
+logger.info("This is an info")
 logger.warning("This is a warning")
-logger.error("This is a error")
+logger.error("This is an error")
 logger.critical("This is a critical")
 logger.debug("This is a debug")
 # Those are level of logging, by specifying the level, the logger will filter them and write into a log file
