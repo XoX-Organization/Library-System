@@ -40,6 +40,8 @@ class Member:
         Base = {}
         Base[self.ID] = {
             "Annual-Fee": None,
+            "Borrowing-Book": {},
+            "History-Returned-Book": [],
             "Class": None,
             "Creation-Date": str(datetime.now()),
             "Entitlement": {

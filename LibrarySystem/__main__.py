@@ -1,7 +1,7 @@
 
 # Title : Library System
 # Programmer : Xian Yee
-# Version : 0.1.0-a1
+# Version : 0.1.0-a2
 
 
 import os
@@ -15,6 +15,7 @@ from distutils.util import strtobool
 from LibrarySystem.Storing import Storing
 from LibrarySystem.Member import Member
 from LibrarySystem.Employee import Employee
+from LibrarySystem.Lender import Lender
 from LibrarySystem.Logging import get_logger, shutdown
 from LibrarySystem.Path import Path
 
@@ -247,6 +248,50 @@ def main():
                 
                 if option == "2":
                     
+                    def Borrow():
+                        cls(Print_CTRL_C = True)
+                        print("Borrow section")
+                        id = input("ID: ")
+                        object = Lender(id)
+                        
+                        if object.valid_ID != True:
+                            print("Invalid ID")
+                            input("Press >ENTER< to continue")
+                            return True
+                        
+                        while True:
+                            try:
+                                cls(Print_CTRL_C = True)
+                                print(f"Member: {id}")
+                                book_id = input("Book ID wish to borrow: ")
+                                object.Borrow(book_id)
+                                input("Press >Enter< to continue")
+                            except KeyboardInterrupt: break
+                        
+                        return True
+                    
+                    def Return():
+                        cls(Print_CTRL_C = True)
+                        print("Return section")
+                        id = input("ID: ")
+                        object = Lender(id)
+                        
+                        if object.valid_ID != True:
+                            print("Invalid ID")
+                            input("Press >ENTER< to continue")
+                            return True
+                        
+                        while True:
+                            try:
+                                cls(Print_CTRL_C = True)
+                                print(f"Member: {id}")
+                                book_id = input("Book ID wish to return: ")
+                                object.Return(book_id)
+                                input("Press >Enter< to continue")
+                            except KeyboardInterrupt: break
+                        
+                        return True
+                    
                     while True:
                         cls()
                         print("\t---------------------------------------------------")
@@ -259,6 +304,8 @@ def main():
                         print("\t3. Register")
                         print("\t4. Modify")
                         print("\t5. Delete")
+                        print("\t6. Borrow book")
+                        print("\t7. Return book")
                         option_member = input("\n\nChoose an option: ").upper()
                         if option_member == "Q": break
                         
@@ -267,7 +314,9 @@ def main():
                             "2": Function("Member").search,
                             "3": Function("Member").register,
                             "4": Function("Member").modify_head,
-                            "5": Function("Member").delete
+                            "5": Function("Member").delete,
+                            "6": Borrow,
+                            "7": Return
                         }
                         
                         loop = True
@@ -318,19 +367,37 @@ def main():
     #                       END OF PROGRAM
     # ////////////////////////////////////////////////////////////
         
-    except (Exception) as e:
+    except Exception as e:
         cls()
         logger = get_logger("SystemError")
         logger.error(traceback.format_exc())
         
+    except KeyboardInterrupt: cls()
+        
     finally:
+        
+        import re
+        SRC = os.path.abspath(os.path.dirname(__file__))
+        if os.path.exists(os.path.join(SRC, 'LibrarySystem/__init__.py')):
+            path = os.path.join(SRC, 'LibrarySystem/__init__.py')
+        else: path = os.path.join(SRC, '__init__.py')
+        def get_version():
+            with open(path) as f:
+                for line in f:
+                    m = re.match("__version__ = '(.*)'", line)
+                    if m:
+                        return m.group(1)
+        
+        
         shutdown()
+        print(f"\t\tVersion: {get_version()}")
         print("\n\n\tData has been saved in the following path:")
         print(f"\t{Path().user_data_roaming_dir}\n")
         print("\n\tSources:")
         print("\thttps://github.com/KimAssignment/Library-System/\n")
         print("\n\tBugs and Feature Suggestions:")
         print("\thttps://github.com/KimAssignment/Library-System/issues\n\n")
+        input("\tPress >Enter< to continue")
         
         
         

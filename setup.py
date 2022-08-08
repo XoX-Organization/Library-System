@@ -9,10 +9,12 @@ with open("README.md", "r") as README :
     LongDescription = README.read()
     
 SRC = os.path.abspath(os.path.dirname(__file__))
-
+if os.path.exists(os.path.join(SRC, 'LibrarySystem/__init__.py')):
+    path = os.path.join(SRC, 'LibrarySystem/__init__.py')
+else: path = os.path.join(SRC, '__init__.py')
 
 def get_version():
-    with open(os.path.join(SRC, 'LibrarySystem/__init__.py')) as f:
+    with open(path) as f:
         for line in f:
             m = re.match("__version__ = '(.*)'", line)
             if m:
