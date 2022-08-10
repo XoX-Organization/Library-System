@@ -9,5 +9,4 @@ from .Lender import Lender
 from .Logging import *
 from .Member import Member
 from .Path import Path
-from .Seller import Seller
 from .Storing import Storing
