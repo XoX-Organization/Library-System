@@ -3,8 +3,8 @@ import os
 import json
 import traceback
 
-from LibrarySystem.Logging import get_logger, remove_handler, shutdown
-from LibrarySystem.Path import Path
+from .Logging import get_logger, remove_handler, shutdown
+from .Path import Path
 
 
 def valid_JSON(FILE_NAME):
@@ -67,15 +67,6 @@ def push_data(LOGGER_NAME, FILE_NAME, DUMP_DATA):
         return True
 
 
-class DB_Storing:
-    
-    def Retrieve():
-        return pull_data("DB_Storing.Retrieve", "DB_Storing.json")
-        
-    def Dump(Database):
-        push_data("DB_Storing.Dump", "DB_Storing.json", Database)
-            
-            
 class DB_Employee:
     
     def Retrieve():
@@ -83,7 +74,7 @@ class DB_Employee:
         
     def Dump(Database):
         push_data("DB_Employee.Dump", "DB_Employee.json", Database)
-            
+        
 class DB_Member:
     
     def Retrieve():
@@ -91,3 +82,12 @@ class DB_Member:
         
     def Dump(Database):
         push_data("DB_Member.Dump", "DB_Member.json", Database)
+
+class DB_Storing:
+    
+    def Retrieve():
+        return pull_data("DB_Storing.Retrieve", "DB_Storing.json")
+        
+    def Dump(Database):
+        push_data("DB_Storing.Dump", "DB_Storing.json", Database)
+        

@@ -1,8 +1,8 @@
 
 from datetime import datetime
 
-from LibrarySystem.Database import DB_Storing, DB_Member
-from LibrarySystem.Logging import get_logger, remove_handler
+from .Database import DB_Storing, DB_Member
+from .Logging import get_logger, remove_handler
 
 class Lender:
 

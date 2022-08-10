@@ -6,7 +6,7 @@
 
 # Program produced files
 *.json
-
+*[Dd]raft*
 
 
 

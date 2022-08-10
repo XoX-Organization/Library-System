@@ -1,8 +1,13 @@
 
 __version__ = '0.1.0-a2'
 
-from LibrarySystem.Common_Methods import Common
-from LibrarySystem.Constants import *
-from LibrarySystem.Database import DB_Storing, DB_Member, DB_Employee
-from LibrarySystem.Logging import get_logger, remove_handler
-from LibrarySystem.Path import Path
+from .Common_Methods import Common
+from .Constants import *
+from .Database import DB_Employee, DB_Member, DB_Storing
+from .Employee import Employee
+from .Lender import Lender
+from .Logging import *
+from .Member import Member
+from .Path import Path
+from .Seller import Seller
+from .Storing import Storing

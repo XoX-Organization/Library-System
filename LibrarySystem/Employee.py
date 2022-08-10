@@ -3,9 +3,9 @@ import bcrypt
 
 from datetime import datetime
 
-from LibrarySystem.Logging import get_logger, remove_handler
-from LibrarySystem.Database import DB_Employee
-from LibrarySystem.Common_Methods import Common
+from .Common_Methods import Common
+from .Database import DB_Employee
+from .Logging import get_logger, remove_handler
 
 
 class Employee:

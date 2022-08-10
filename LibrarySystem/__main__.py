@@ -8,16 +8,16 @@ import os
 import platform
 import traceback
 
-from tabulate import tabulate
-from getpass import getpass
 from distutils.util import strtobool
+from getpass import getpass
+from tabulate import tabulate
 
-from LibrarySystem.Storing import Storing
-from LibrarySystem.Member import Member
-from LibrarySystem.Employee import Employee
-from LibrarySystem.Lender import Lender
-from LibrarySystem.Logging import get_logger, shutdown
-from LibrarySystem.Path import Path
+from .Employee import Employee
+from .Lender import Lender
+from .Logging import get_logger, shutdown
+from .Member import Member
+from .Path import Path
+from .Storing import Storing
 
 
 def cls(Print_CTRL_C = False):
@@ -38,7 +38,7 @@ def cls(Print_CTRL_C = False):
         
 
 
-def main():
+def _main():
     try:
         global LOGIN_USER
         
@@ -397,10 +397,12 @@ def main():
         print("\thttps://github.com/KimAssignment/Library-System/\n")
         print("\n\tBugs and Feature Suggestions:")
         print("\thttps://github.com/KimAssignment/Library-System/issues\n\n")
-        input("\tPress >Enter< to continue")
+        input("\tPress >Enter< to exit")
         
         
-        
+def main():
+    
+    _main()
         
         
         

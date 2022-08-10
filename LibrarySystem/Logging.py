@@ -2,7 +2,8 @@
 import os
 import logging
 from logging.handlers import TimedRotatingFileHandler
-from LibrarySystem.Path import Path
+
+from .Path import Path
 
 
 FORMATTER = logging.Formatter("[%(asctime)s][%(levelname)s][%(name)s]	%(message)s")

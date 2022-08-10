@@ -1,7 +1,7 @@
 
 from datetime import datetime
 
-from LibrarySystem.Common_Methods import Common
+from .Common_Methods import Common
 
 class Storing:
     
