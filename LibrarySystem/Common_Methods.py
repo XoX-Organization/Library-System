@@ -26,7 +26,7 @@ class Common:
             self.db = DB_Member
             self.database = DB_Member.Retrieve()
             
-    def List(self, ID = None, Only_Modifiable = False):
+    def List(self, ID = None, Only_Modifiable = False, Include_Title = True, Title_Only = False):
         logger = get_logger(self.logger_name)
         
         if not self.database.keys():
@@ -35,23 +35,35 @@ class Common:
             return False
 
         List = []
-        SList = ["ID"]
+        if Include_Title or Title_Only: SList = ["ID"]
+        else: SList = []
         
-        for y in self.database.values():
-            for yx in y:
-                
-                if Only_Modifiable == True:
-                    if yx in UNMODIFIABLE_LIST:
+        if Include_Title or Title_Only:
+            for y in self.database.values():
+                for yx in y:
+                    
+                    if yx in UNPUBLICITY_LIST:
                         continue
                     
-                SList.append(yx)
-            break
-        List.append(SList)
+                    if Only_Modifiable == True:
+                        if yx in UNMODIFIABLE_LIST:
+                            continue
+                        
+                    SList.append(yx)
+                break
+            List.append(SList)
+        
+        if Title_Only:
+            logger = remove_handler(logger)
+            return List
         
         if ID == None:
             for x, y in self.database.items():
                 SList = [x]
                 for yx in y:
+                    
+                    if yx in UNPUBLICITY_LIST:
+                        continue
                     
                     if Only_Modifiable == True:
                         if yx in UNMODIFIABLE_LIST:
@@ -63,6 +75,9 @@ class Common:
         elif ID != None:
             SList = [ID]
             for x in self.database[ID].keys():
+                
+                if x in UNPUBLICITY_LIST:
+                    continue
                     
                 if Only_Modifiable == True:
                     if x in UNMODIFIABLE_LIST:
@@ -72,8 +87,8 @@ class Common:
             List.append(SList)
             
         logger = remove_handler(logger)
-                
-        return List
+        if not Include_Title: return SList
+        else: return List
         
     def Search(self, *keywords):
         logger = get_logger(self.logger_name)
@@ -95,24 +110,15 @@ class Common:
                         if x not in ListID:
                             ListID.append(x)
                             
-        SList = ["ID"]
-        for x, y in self.database.items():
-            for yx in y:
-                SList.append(yx)
-            break
-        List = []
-        List.append(SList)
-        
+        List = self.List(Title_Only = True)
         for x in ListID:
-            SList = [x]
-            for y in self.database[x]:
-                SList.append(self.database[x][y])
-            List.append(SList)
+            List.append(
+                self.List(ID = x, Include_Title = False)
+            )
                     
         logger.info(f"Finished searching by given keywords: {keywords}")
         
         logger = remove_handler(logger)
-        
         return List
     
     def valid_ID(self, ID):
@@ -137,7 +143,6 @@ class Common:
         logger.info(f"{ID} has been added successfully")
         
         logger = remove_handler(logger)
-        
         return True
         
     def Modify(self, ID, Key, Value):
@@ -172,7 +177,6 @@ class Common:
         self.db.Dump(self.database)
         
         logger = remove_handler(logger)
-        
         return True
         
     def Delete(self, ID):
@@ -192,5 +196,4 @@ class Common:
         self.db.Dump(self.database)
         
         logger = remove_handler(logger)
-        
         return True

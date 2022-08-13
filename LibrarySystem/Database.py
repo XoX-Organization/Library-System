@@ -1,6 +1,7 @@
 
 import os
 import json
+import time
 import traceback
 
 from .Logging import get_logger, remove_handler, shutdown
@@ -24,11 +25,6 @@ def valid_JSON(FILE_NAME):
                 logger = remove_handler(logger)
                 
                 return True
-            
-        except json.decoder.JSONDecodeError:
-            logger.error(traceback.format_exc())
-            shutdown()
-            raise SystemExit(1)
         
         except FileNotFoundError:
             open(FILE, "w+", encoding = "UTF-8")
@@ -36,6 +32,7 @@ def valid_JSON(FILE_NAME):
 
 def pull_data(LOGGER_NAME, FILE_NAME):
     logger = get_logger(LOGGER_NAME)
+    start_time = time.time() * 1000
     
     FILE_PATH = Path().user_data_roaming_dir
     FILE = os.path.join(FILE_PATH, FILE_NAME)
@@ -44,7 +41,7 @@ def pull_data(LOGGER_NAME, FILE_NAME):
     
     with open(FILE, "r", encoding = "UTF-8") as f:
         JSON = json.load(f)
-        logger.debug(f"{FILE_NAME} has been successfully loaded")
+        logger.debug(f"{FILE_NAME} has been successfully loaded (Execution time: {(time.time() * 1000 - start_time):.2f} ms)")
         
         logger = remove_handler(logger)
         
@@ -52,6 +49,7 @@ def pull_data(LOGGER_NAME, FILE_NAME):
             
 def push_data(LOGGER_NAME, FILE_NAME, DUMP_DATA):
     logger = get_logger(LOGGER_NAME)
+    start_time = time.time() * 1000
     
     FILE_PATH = Path().user_data_roaming_dir
     FILE = os.path.join(FILE_PATH, FILE_NAME)
@@ -60,7 +58,7 @@ def push_data(LOGGER_NAME, FILE_NAME, DUMP_DATA):
     
     with open(FILE, "w", encoding = "UTF-8") as f:
         json.dump(DUMP_DATA, f, indent = 4, ensure_ascii = False, sort_keys = False)
-        logger.debug(f"Data has been dumped successfully into {FILE_NAME}")
+        logger.debug(f"Data has been dumped successfully into {FILE_NAME} (Execution time: {(time.time() * 1000 - start_time):.2f} ms)")
         
         logger = remove_handler(logger)
         
