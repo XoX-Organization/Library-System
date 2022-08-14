@@ -1,5 +1,6 @@
 
 import os
+import time
 
 from difflib import SequenceMatcher
 from jsonmerge import merge
@@ -87,7 +88,7 @@ class Common:
             List.append(SList)
             
         logger = remove_handler(logger)
-        if not Include_Title: return SList
+        if Include_Title == False and Title_Only == False and ID != None: return SList
         else: return List
         
     def Search(self, *keywords):
@@ -102,6 +103,8 @@ class Common:
             logger = remove_handler(logger)
             return False
         
+        start_time = time.time() * 1000
+        
         ListID = []
         for x, y in self.database.items():
             for yx in y:
@@ -115,9 +118,9 @@ class Common:
             List.append(
                 self.List(ID = x, Include_Title = False)
             )
-                    
-        logger.info(f"Finished searching by given keywords: {keywords}")
         
+        logger = get_logger(self.logger_name)
+        logger.info(f"Finished searching by given keywords: {keywords} (Execution time: {(time.time() * 1000 - start_time):.2f} ms)")
         logger = remove_handler(logger)
         return List
     

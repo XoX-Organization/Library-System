@@ -71,10 +71,13 @@ class Storing:
         Base[self.ID] = {
             "Author": None,
             "BookTitle": None,
+            "Catalogue-Type": None,
             "Creation-Date": str(datetime.now()),
+            "Internal-Reference": None,
+            "ISBN-Number": None,
             "Pricing": None,
-            "Subject": None,
-            "Stock": {}
+            "Stock": {},
+            "Subject": None
             }
         
         return Method.Register(self.ID, Base)

@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .Common_Methods import Common
 from .Database import DB_Member
@@ -9,12 +9,11 @@ class Member:
     
     def __init__(self, ID):
         self.ID = ID
-        self._database = None
         
     @property
     def database(self):
-        if self._database == None:
-            self._database = DB_Member.Retrieve()
+        try: self._database
+        except: self._database = DB_Member.Retrieve()
         return self._database
     
     @staticmethod
@@ -35,11 +34,20 @@ class Member:
     
     @property
     def valid_ID(self):
-        LOGGER_NAME = None
-        DATATYPE = "DB_Member"
+        valid_logger = get_logger("Member.valid_ID")
         
-        Method = Common(LOGGER_NAME, DATATYPE)
-        return Method.valid_ID(self.ID)
+        if self.ID not in self.database:
+            valid_logger = remove_handler(valid_logger)
+            return False
+        
+        if self.database[self.ID]["Membership-Status"].upper() in ["BARRED", "DEACTIVATED"]:
+            status = self.database[self.ID]["Membership-Status"]
+            valid_logger.info(f"Member {self.ID} has been {status}")
+            valid_logger = remove_handler(valid_logger)
+            return False
+        
+        valid_logger = remove_handler(valid_logger)
+        return True
     
     def Register(self):
         LOGGER_NAME = "Member.Register"
@@ -53,7 +61,7 @@ class Member:
             "Class": None,
             "Creation-Date": str(datetime.now()),
             "Entitlement": None,
-            "Membership-Status": None,
+            "Membership-Status": "Active",
             "Membership-Type": None,
             "Name": None,
             "One-Time-Deposit": None,
@@ -85,7 +93,8 @@ class Member:
             raise Exception("Serious ERROR had occured, please solve the bugs before next run to prevent Database CORRUPTED")
         
         self.database[self.ID]["Stock"]["Borrowing"][StockID] = {
-                                                                "Date-Borrowed": str(datetime.now())
+                                                                "Date-Borrowed": str(datetime.now()),
+                                                                "Due-Date": str(datetime.now() + timedelta(days = 7))
                                                                 }
         DB_Member.Dump(self.database)
         
@@ -125,6 +134,76 @@ class Member:
         logger = remove_handler(logger)
         
         return True
+        
+    def PenaltyLateReturn(self):
+        
+        if not self.valid_ID:
+            logger.info(f"Invalid {self.ID}")
+            logger = remove_handler(logger)
+            return False
+        
+        penalty_item = []
+        subtotal = 0
+        for item in self.database[self.ID]["Stock"]["Borrowing"]:
+            due_date = datetime.strptime(self.database[self.ID]["Stock"]["Borrowing"][item]["Due-Date"], "%Y-%m-%d %H:%M:%S.%f")
+            
+            if due_date >= datetime.now():
+                continue
+            
+            time_delta = datetime.now() - due_date
+            time_delta_seconds = time_delta.total_seconds() # Convert timedelta class into seconds
+            time_delta_days = time_delta_seconds // 86400 # 1 day 86400 seconds
+            subtotal += time_delta_days * 0.5 # 1 day RM0.50
+            
+            penalty_item.append(item)
+            
+        return penalty_item, subtotal
+    
+    def ListBorrowing(self):
+        
+        if not self.valid_ID:
+            logger.info(f"Invalid {self.ID}")
+            logger = remove_handler(logger)
+            return False
+        
+        logger = get_logger("Member.ListBorrowing")
+        
+        if not self.database[self.ID]["Stock"]["Borrowing"]:
+            logger.warning("Database is empty.")
+            logger = remove_handler(logger)
+            return False
+        
+        List = []
+        SList = ["Stock-ID"]
+        for y in self.database[self.ID]["Stock"]["Borrowing"].values():
+            for yx in y:
+                if yx not in SList:
+                    SList.append(yx)
+            
+        List.append(SList)
+        
+        for x, y in self.database[self.ID]["Stock"]["Borrowing"].items():
+            SList = [x]
+            for yx in y:
+                SList.append(self.database[self.ID]["Stock"]["Borrowing"][x][yx])
+                
+            List.append(SList)
+        
+        
+        SList = []
+        List[0].append("Subtotal-Penalty")
+        
+        length = len(List[0])
+        for i in range(length - 1):
+            SList.append("")
+            
+        penalty = self.PenaltyLateReturn()
+        SList.append(penalty[1])
+        
+        List.append(SList)
+        
+        logger = remove_handler(logger)
+        return List
         
     def Modify(self, Key, Value):
         LOGGER_NAME = "Member.Modify"

@@ -1,7 +1,7 @@
 
 # Title : Library System
 # Programmer : Xian Yee
-# Version : 0.1.1-a1
+# Version : 0.1.2-a1
 
 
 import os
@@ -337,7 +337,7 @@ def _main():
                 def Borrow():
                     cls(Print_CTRL_C = True)
                     print("Borrow section")
-                    member_id = input("Member ID: ")
+                    member_id = input("Member ID: ").upper()
                     
                     if Member(member_id).valid_ID != True:
                         print("Invalid Member ID")
@@ -348,7 +348,7 @@ def _main():
                         try:
                             cls(Print_CTRL_C = True)
                             print(f"Member: {member_id}")
-                            book_id = input("Book ID wish to borrow: ")
+                            book_id = input("Book ID wish to borrow: ").upper()
                             Storing(book_id).LendStock(MemberID = member_id)
                             input("Press >Enter< to continue")
                         except KeyboardInterrupt: break
@@ -358,9 +358,30 @@ def _main():
                 def Return():
                     cls(Print_CTRL_C = True)
                     print("Return section")
-                    book_id = input("Book ID: ")
+                    book_id = input("Book ID: ").upper()
                     
                     Storing(book_id).ReturnStock()
+                    return True
+                
+                def ListBorrowing():
+                    cls(Print_CTRL_C = True)
+                    print("List member borrowing section")
+                    member_id = input("Member ID: ").upper()
+                    
+                    member = Member(member_id)
+                    if member.valid_ID != True:
+                        print("Invalid Member ID")
+                        input("Press >ENTER< to continue")
+                        return True
+                    
+                    table = member.ListBorrowing()
+                    print(tabulate(
+                        table,
+                        headers = "firstrow",
+                        tablefmt = "grid",
+                        missingval = "N/A"
+                    ))
+                    input("Press >Enter< to continue")
                     return True
                 
                 while True:
@@ -381,6 +402,7 @@ def _main():
                         "\t5. Delete",
                         "\t6. Borrow book",
                         "\t7. Return book",
+                        "\t8. List Borrowing (Include subtotal penalty)",
                         sep = "\n"
                     )
                     
@@ -394,7 +416,8 @@ def _main():
                         "4": Function("Member").modify_head,
                         "5": Function("Member").delete,
                         "6": Borrow,
-                        "7": Return
+                        "7": Return,
+                        "8": ListBorrowing
                     }
                     
                     loop = True

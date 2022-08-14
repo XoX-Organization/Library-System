@@ -12,7 +12,12 @@ class Employee:
     
     def __init__(self, ID):
         self.ID = ID
-        self.Database = DB_Employee.Retrieve()
+        
+    @property
+    def database(self):
+        try: self._database
+        except: self._database = DB_Employee.Retrieve()
+        return self._database
         
     @staticmethod
     def List(ID = None, Only_Modifiable = False):
@@ -39,30 +44,30 @@ class Employee:
         
     @property
     def valid_ID(self):
-        LOGGER_NAME = None
-        DATATYPE = "DB_Employee"
+    
+        if self.ID not in self.database:
+            return False
         
-        Method = Common(LOGGER_NAME, DATATYPE)
-        return Method.valid_ID(self.ID)
+        return True
     
     def Login(self, password):
         logger = get_logger("Employee.Login")
         
-        if not Employee(self.ID).valid_ID:
+        if not self.valid_ID:
             logger.info(f"Invalid {self.ID}, please register")
             logger = remove_handler(logger)
             return False
         
-        if "BCrypt-Pass" in self.Database[self.ID].keys():
-            hashed_pass = self.Database[self.ID]["BCrypt-Pass"]
+        if "BCrypt-Pass" in self.database[self.ID].keys():
+            hashed_pass = self.database[self.ID]["BCrypt-Pass"]
             if bcrypt.checkpw(password.encode('utf-8'), hashed_pass.encode('utf-8')):
                 logger.info(f"Login successful as user {self.ID}")
                 logger = remove_handler(logger)
                     
                 return True
             
-        elif "Password" in self.Database[self.ID].keys() == False:
-            if password == self.Database[self.ID]["Password"]:
+        elif "Password" in self.database[self.ID].keys() == False:
+            if password == self.database[self.ID]["Password"]:
                 logger.info(f"Login successful as user {self.ID}")
                 logger = remove_handler(logger)
                     
