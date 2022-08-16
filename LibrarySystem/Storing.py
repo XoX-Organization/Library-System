@@ -228,15 +228,17 @@ class Storing:
             logger = remove_handler(logger)
             return False
         
+        if MemberID != None:
+            if not member._BorrowStock(self.ID):
+                return False
+            self.database[self.base_id]["Stock"][self.ID]["Latest-Member-Borrowed"] = MemberID
+        else:
+            self.database[self.base_id]["Stock"][self.ID]["Latest-Member-Borrowed"] = None
+            
         initial_status = self.database[self.base_id]["Stock"][self.ID]["Status"]
         self.database[self.base_id]["Stock"][self.ID]["Status"] = "Lending"
         self.database[self.base_id]["Stock"][self.ID]["Latest-Date-Lent"] = str(datetime.now())
         self.database[self.base_id]["Stock"][self.ID]["Latest-Date-Returned"] = None
-        self.database[self.base_id]["Stock"][self.ID]["Latest-Member-Borrowed"] = None
-        
-        if MemberID != None:
-            self.database[self.base_id]["Stock"][self.ID]["Latest-Member-Borrowed"] = MemberID
-            member._BorrowStock(self.ID)
         
         DB_Storing.Dump(self.database)
         
@@ -258,13 +260,14 @@ class Storing:
             logger = remove_handler(logger)
             return False
         
+        MemberID = self.database[self.base_id]["Stock"][self.ID]["Latest-Member-Borrowed"]
+        if MemberID != None:
+            if not Member(MemberID)._ReturnStock(self.ID):
+                return False
+            
         initial_status = self.database[self.base_id]["Stock"][self.ID]["Status"]
         self.database[self.base_id]["Stock"][self.ID]["Status"] = "Available"
         self.database[self.base_id]["Stock"][self.ID]["Latest-Date-Returned"] = str(datetime.now())
-        
-        MemberID = self.database[self.base_id]["Stock"][self.ID]["Latest-Member-Borrowed"]
-        if MemberID != None:
-            Member(MemberID)._ReturnStock(self.ID)
         
         DB_Storing.Dump(self.database)
         
@@ -300,8 +303,27 @@ class Storing:
         return Method.Modify(self.ID, Key, Value)
         
     def Delete(self):
-        LOGGER_NAME = "Storing.Delete"
-        DATATYPE = "DB_Storing"
+        logger = get_logger("Storing.Delete")
         
-        Method = Common(LOGGER_NAME, DATATYPE)
-        return Method.Delete(self.ID)
+        if self.ID == "":
+            logger = remove_handler(logger)
+            return False
+        
+        if not self.valid_ID:
+            logger.info(f"Invalid {self.ID}")
+            logger = remove_handler(logger)
+            return False
+        
+        for stock_id in self.database[self.ID]["Stock"].keys():
+            if self.database[self.ID]["Stock"][stock_id]["Status"] in ("Lending"):
+                member_borrowed = self.database[self.ID]["Stock"][stock_id]["Latest-Member-Borrowed"]
+                logger.info(f"Stock ({stock_id}) of ({self.ID}) is currently borrowed by member ({member_borrowed}), please gather all the stocks before next deletion operation")
+                logger = remove_handler(logger)
+                return False
+            
+        del self.database[self.ID]
+        logger.info(f"Deletion successful for {self.ID}")
+        DB_Storing.Dump(self.database)
+        
+        logger = remove_handler(logger)
+        return True

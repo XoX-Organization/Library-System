@@ -115,6 +115,16 @@ class Member:
             logger.error("Serious ERROR had occured, please solve the bugs before next run to prevent Database CORRUPTED")
             raise Exception("Serious ERROR had occured, please solve the bugs before next run to prevent Database CORRUPTED")
         
+        penalty = self._PenaltyLateReturn(StockID)
+        if penalty > 0:
+            try:
+                while True:
+                    if input(f'Enter "CONFIRM" after the payment (RM {penalty:.2f}) is made to continue: ') == "CONFIRM":
+                        break
+            except:
+                logger.warning("Payment transaction failed, please try again")
+                return False
+        
         date_borrowed = self.database[self.ID]["Stock"]["Borrowing"][StockID]["Date-Borrowed"]
         del self.database[self.ID]["Stock"]["Borrowing"][StockID]
 
@@ -134,45 +144,57 @@ class Member:
         logger = remove_handler(logger)
         
         return True
+    
+    @property
+    def TotalPenalty(self):
+        total = 0
         
-    def PenaltyLateReturn(self):
+        for stock_id in self.database[self.ID]["Stock"]["Borrowing"]:
+            total += self._PenaltyLateReturn(stock_id)
+        
+        return total
+    
+    def _PenaltyLateReturn(self, StockID):
+        logger = get_logger("Member._PenaltyLateReturn")
         
         if not self.valid_ID:
             logger.info(f"Invalid {self.ID}")
             logger = remove_handler(logger)
             return False
         
-        penalty_item = []
-        subtotal = 0
-        for item in self.database[self.ID]["Stock"]["Borrowing"]:
-            due_date = datetime.strptime(self.database[self.ID]["Stock"]["Borrowing"][item]["Due-Date"], "%Y-%m-%d %H:%M:%S.%f")
-            
-            if due_date >= datetime.now():
-                continue
-            
-            time_delta = datetime.now() - due_date
-            time_delta_seconds = time_delta.total_seconds() # Convert timedelta class into seconds
-            time_delta_days = time_delta_seconds // 86400 # 1 day 86400 seconds
-            subtotal += time_delta_days * 0.5 # 1 day RM0.50
-            
-            penalty_item.append(item)
-            
-        return penalty_item, subtotal
+        if StockID not in self.database[self.ID]["Stock"]["Borrowing"]:
+            logger.critical(f"{StockID} is not borrowed by {self.ID}")
+            logger = remove_handler(logger)
+            return False
+        
+        due_date = datetime.strptime(self.database[self.ID]["Stock"]["Borrowing"][StockID]["Due-Date"], "%Y-%m-%d %H:%M:%S.%f")
+        
+        if due_date >= datetime.now():
+            logger = remove_handler(logger)
+            return 0
+        
+        time_delta = datetime.now() - due_date
+        time_delta_seconds = time_delta.total_seconds() # Convert timedelta class into seconds
+        time_delta_days = time_delta_seconds // 86400 # 1 day 86400 seconds
+        subtotal = time_delta_days * 0.5 # 1 day RM0.50
+        
+        logger = remove_handler(logger)
+        return subtotal
     
     def ListBorrowing(self):
+        logger = get_logger("Member.ListBorrowing")
         
         if not self.valid_ID:
             logger.info(f"Invalid {self.ID}")
             logger = remove_handler(logger)
             return False
         
-        logger = get_logger("Member.ListBorrowing")
-        
         if not self.database[self.ID]["Stock"]["Borrowing"]:
-            logger.warning("Database is empty.")
+            logger.warning("Database is empty")
             logger = remove_handler(logger)
             return False
         
+        ### Getting the headers of the table
         List = []
         SList = ["Stock-ID"]
         for y in self.database[self.ID]["Stock"]["Borrowing"].values():
@@ -180,26 +202,35 @@ class Member:
                 if yx not in SList:
                     SList.append(yx)
             
+        SList.append("Subtotal-Penalty")
         List.append(SList)
         
-        for x, y in self.database[self.ID]["Stock"]["Borrowing"].items():
-            SList = [x]
-            for yx in y:
-                SList.append(self.database[self.ID]["Stock"]["Borrowing"][x][yx])
+        
+        ### Getting the data of the table
+        for stock_id in self.database[self.ID]["Stock"]["Borrowing"].keys():
+            SList = [stock_id]
+            
+            for header in List[0]:
+                if header in ("Stock-ID", "Subtotal-Penalty"):
+                    continue
+                
+                SList.append(self.database[self.ID]["Stock"]["Borrowing"][stock_id][header])
                 
             List.append(SList)
+            
+        ### Getting the subtotal of the penalty
+        for i in range(1, len(List)):
+            stock_id = List[i][0]
+            penalty = self._PenaltyLateReturn(stock_id)
+            List[i].append(penalty)
         
         
+        ### Print total of penalty
         SList = []
-        List[0].append("Subtotal-Penalty")
-        
-        length = len(List[0])
-        for i in range(length - 1):
+        for i in range(1, len(List[0])):
             SList.append("")
             
-        penalty = self.PenaltyLateReturn()
-        SList.append(penalty[1])
-        
+        SList.append("Total-Penalty: RM {:.2f}".format(self.TotalPenalty))
         List.append(SList)
         
         logger = remove_handler(logger)

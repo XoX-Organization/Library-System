@@ -361,6 +361,7 @@ def _main():
                     book_id = input("Book ID: ").upper()
                     
                     Storing(book_id).ReturnStock()
+                    input("Press >ENTER< to continue")
                     return True
                 
                 def ListBorrowing():
