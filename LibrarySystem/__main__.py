@@ -1,7 +1,7 @@
 
 # Title : Library System
 # Programmer : Xian Yee
-# Version : 0.1.2-a1
+# Version : 0.1.2-a2
 
 
 import os
