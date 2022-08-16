@@ -32,7 +32,7 @@ LibrarySystem
 
 Usage as a library
 -----
-```bash
+```python
 
 #### About Storing
 from LibrarySystem.Storing import Storing
