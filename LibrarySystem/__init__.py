@@ -1,5 +1,5 @@
 
-__version__ = '0.1.3-a1'
+__version__ = '0.1.3-a2'
 
 from .Common_Methods import Common
 from .Constants import *
