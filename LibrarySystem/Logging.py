@@ -6,10 +6,10 @@ from logging.handlers import TimedRotatingFileHandler
 from .Path import Path
 
 
-FORMATTER = logging.Formatter("[%(asctime)s][%(levelname)s][%(name)s]	%(message)s")
-CONSOLE_FORMATTER = logging.Formatter("%(message)s")
+FORMATTER = logging.Formatter('[%(asctime)s][%(levelname)s][%(name)s]	%(message)s')
+CONSOLE_FORMATTER = logging.Formatter('%(message)s')
 FILE_PATH = Path().user_data_roaming_dir
-FILE_NAME = "System.log"
+FILE_NAME = 'System.log'
 LOG_FILE = os.path.join(FILE_PATH, FILE_NAME)
 
 def _get_console_handler():
@@ -36,10 +36,10 @@ def get_receipt_logger(EmployeeID):
     logger = logging.getLogger(EmployeeID)
     logger.setLevel(logging.DEBUG)
     
-    file_handler = TimedRotatingFileHandler(os.path.join(FILE_PATH, "Receipt.txt"),
+    file_handler = TimedRotatingFileHandler(os.path.join(FILE_PATH, 'Receipt.txt'),
                                             when='midnight')
     file_handler.setFormatter(
-        logging.Formatter("[%(asctime)s][EmployeeID: %(name)s]\n%(message)s\n\n")
+        logging.Formatter('[%(asctime)s][EmployeeID: %(name)s]\n%(message)s\n\n')
     )
     
     logger.addHandler(file_handler)

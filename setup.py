@@ -36,9 +36,10 @@ setup(
     python_requires = ">=3.6",
     install_requires = [
         "bcrypt",
-        "tabulate",
         "jsonmerge",
-        "platformdirs"
+        "pick",
+        "platformdirs",
+        "tabulate"
         ],
     entry_points = {
         "console_scripts": ["librarysystem = LibrarySystem.__main__:main"],

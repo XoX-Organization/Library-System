@@ -1,5 +1,5 @@
 
-__version__ = '0.1.2-a2'
+__version__ = '0.1.3-a1'
 
 from .Common_Methods import Common
 from .Constants import *
@@ -8,4 +8,5 @@ from .Employee import Employee
 from .Logging import *
 from .Member import Member
 from .Path import Path
+from .Pick import pick
 from .Storing import Storing
