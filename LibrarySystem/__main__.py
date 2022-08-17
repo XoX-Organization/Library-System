@@ -483,7 +483,7 @@ def main():
             
             with open(PATH) as f:
                 for line in f:
-                    m = re.match('__version__ = "(.*)"', line)
+                    m = re.match("__version__ = '(.*)'", line)
                     if m:
                         return m.group(1)
         

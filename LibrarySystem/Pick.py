@@ -197,7 +197,9 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
         while True:            
             self.draw(screen)
             c = screen.getch()
-            if c in KEYS_UP:
+            if c == 3:
+                raise KeyboardInterrupt
+            elif c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
                 self.move_down()
