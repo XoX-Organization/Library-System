@@ -26,6 +26,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 '''
 
@@ -34,7 +35,7 @@ import curses
 from dataclasses import dataclass, field
 from typing import Generic, Callable, List, Optional, Dict, Union, Tuple, TypeVar
 
-from .Constants import *
+from .Constants import ASCII_ART
 
 __all__ = ["Picker", "pick"]
 
@@ -70,6 +71,7 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
     min_selection_count: int = 0
     options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str
     print_ctrl_c: bool = False
+    print_ascii_art: bool = True
     selected_indexes: List[int] = field(init=False, default_factory=list)
     custom_handlers: Dict[KEY_T, Callable[["Picker"], CUSTOM_HANDLER_RETURN_T]] = field(
         init=False, default_factory=dict
@@ -129,13 +131,22 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
             return self.options[self.index], self.index
 
     def get_title_lines(self) -> List[str]:
-        if self.title:
+        if self.print_ascii_art:
+            init_title = ASCII_ART
             if self.print_ctrl_c:
-                result = ASCII_ART.split("\n") + ("\tPress >CTRL+C< to return\n").split("\n") + self.title.split("\n") + [""]
-            else:
-                result = ASCII_ART.split("\n") + self.title.split("\n") + [""]
-            return result
-        return []
+                init_title = init_title + "\n\tPress >CTRL+C< to return\n"
+
+        elif not self.print_ascii_art:
+            init_title = ""
+            if self.print_ctrl_c:
+                init_title = init_title + "\n\tPress >CTRL+C< to return\n"
+
+        if self.title:
+            return (init_title + self.title).split("\n") + [""]
+        elif not self.title and not self.print_ascii_art and not self.print_ctrl_c:
+            return []
+
+        return (init_title).split("\n") + [""]
 
     def get_option_lines(self) -> Union[List[str], List[Tuple[str, int]]]:
         lines: Union[List[str], List[Tuple[str, int]]] = []  # type: ignore[assignment]
@@ -187,14 +198,14 @@ class Picker(Generic[CUSTOM_HANDLER_RETURN_T, OPTIONS_MAP_VALUE_T]):
                 screen.addnstr(y, x, line[0], max_x - 2, line[1])
             else:
                 screen.addnstr(y, x, line, max_x - 2)
-            y += 1 
+            y += 1
 
         screen.refresh()
 
     def run_loop(
         self, screen
     ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T, CUSTOM_HANDLER_RETURN_T]:
-        while True:            
+        while True:
             self.draw(screen)
             c = screen.getch()
             if c == 3:
@@ -251,6 +262,7 @@ def pick(
     min_selection_count: int = 0,
     options_map_func: Callable[[OPTIONS_MAP_VALUE_T], Optional[str]] = str,
     print_ctrl_c: bool = False,
+    print_ascii_art: bool = True,
 ) -> Union[List[PICK_RETURN_T], PICK_RETURN_T]:
     """Construct and start a :class:`Picker <Picker>`.
     Usage::
@@ -268,5 +280,6 @@ def pick(
         min_selection_count,
         options_map_func,
         print_ctrl_c,
+        print_ascii_art
     )
     return picker.start()

@@ -35,13 +35,13 @@ def get_logger(logger_name):
 def get_receipt_logger(EmployeeID):
     logger = logging.getLogger(EmployeeID)
     logger.setLevel(logging.DEBUG)
-    
+
     file_handler = TimedRotatingFileHandler(os.path.join(FILE_PATH, 'Receipt.txt'),
                                             when='midnight')
     file_handler.setFormatter(
         logging.Formatter('[%(asctime)s][EmployeeID: %(name)s]\n%(message)s\n\n')
     )
-    
+
     logger.addHandler(file_handler)
     logger.propagate = False
     return logger

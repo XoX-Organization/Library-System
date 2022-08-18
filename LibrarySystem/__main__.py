@@ -1,9 +1,10 @@
 
 # Title : Library System
 # Programmer : Xian Yee
-# Version : 0.1.3-a2
+# Version : 0.1.4-a1
 
 
+import functools
 import os
 import platform
 import traceback
@@ -13,7 +14,7 @@ from distutils.util import strtobool
 from getpass import getpass
 from tabulate import tabulate
 
-from .Constants import *
+from .Constants import ASCII_ART
 from .Employee import Employee
 from .Logging import get_logger, shutdown
 from .Member import Member
@@ -22,34 +23,53 @@ from .Pick import pick
 from .Storing import Storing
 
 
-def cls(print_ctrl_c = False):
+
+def cls(
+    print_ctrl_c: bool = False,
+    print_ascii_art: bool = True
+    ):
     os_name = platform.system()
     try:
         if os_name == 'Windows':
             os.system('cls')
-            
+
         elif os_name in ('Darwin', 'Linux'):
             os.system('clear')
-            
+
     finally:
-        print(ASCII_ART)
-        
-        if print_ctrl_c == True:
+        if print_ascii_art is True:
+            print('\n', ASCII_ART)
+
+        if print_ctrl_c is True:
             print('\tPress >CTRL+C< back to menu\n')
-        
 
 
-def _main():
-    global LOGIN_USER
-    
+
+def _main(
+    Flush,
+    HashedPassword,
+    MaximumBorrowAllowed,
+    PenaltyLateReturn,
+    PrintASCIIArt
+):
+
+    if Flush is True:
+        global print
+        print = functools.partial(print, flush = True)
+
+    if PrintASCIIArt is False:
+        global cls, pick
+        cls = functools.partial(cls, print_ascii_art = PrintASCIIArt)
+        pick = functools.partial(pick, print_ascii_art = PrintASCIIArt)
+
+
+    # ////////////////////////////////////////////////////////////
+    #                       LOGIN SCREEN
+    # ////////////////////////////////////////////////////////////
+
+
     while True:
-        
-        
-        # ////////////////////////////////////////////////////////////
-        #                       LOGIN SCREEN
-        # ////////////////////////////////////////////////////////////
-        
-        
+
         cls()
         print(
             '\tPress >CTRL+C< to quit the program\n',
@@ -59,167 +79,225 @@ def _main():
             f'\t{"-" * 50}\n',
             sep = '\n'
         )
-        
+
         LOGIN_USER = input('Login ID: ').upper()
+        if LOGIN_USER == "":
+            input('Please enter a valid ID\nPress >ENTER< to continue')
+            continue
+
         employee = Employee(LOGIN_USER)
-        
+
         if employee.valid_ID:
             password = getpass('Password: ')
-            
-            if employee.Login(password) == False:
+
+            if employee.Login(password) is False:
                 input('Press >ENTER< to continue')
                 continue
-            
-            
+
+
         elif not employee.valid_ID:
             cls()
             print(
+                '\tPress >CTRL+C< to quit the program\n',
                 f'\t{"-" * 50}',
                 f'\tWelcome to Library System, {LOGIN_USER}',
-                f'\tSince you are first-time user, you will be prompted to register',
+                '\tSince you are first-time user, you will be prompted to register',
                 f'\t{"-" * 50}',
                 sep = '\n'
             )
-            
+
             password = getpass('Password: ')
             password_again = getpass('Password (again): ')
-            
+
             if password != password_again:
                 print('\nBoth passwords unmatching, back to login screen')
                 input('Press >ENTER< to continue')
                 continue
-                
-            employee.Register(password, hashed = True)
-        
-        
+
+            if HashedPassword is True:
+                employee.Register(password, hashed = True)
+            else:
+                employee.Register(password)
+
+
         # ////////////////////////////////////////////////////////////
         #                       MAIN MENU
         # ////////////////////////////////////////////////////////////
-        
-        
+
         while True:
             cls()
             title = f'\t{"-" * 50}\n\tWelcome to Library System, {LOGIN_USER}\n\t{"-" * 50}'
-            
+
             options = [
                 '\tStorage managing',
                 '\tMembership managing',
                 '\tEmployee managing',
             ]
-            
-            try: option, index = pick(options, title, indicator = ' > ', print_ctrl_c = True)
+
+            try:
+                index = pick(
+                    options,
+                    title,
+                    indicator = ' > ',
+                    print_ctrl_c = True
+                )[1]
+
             except KeyboardInterrupt: break
-            
-            
+
+
             # ////////////////////////////////////////////////////////////
             #                       COMMON FUNCTIONS
             # ////////////////////////////////////////////////////////////
-            
-            
+
+
             class Function:
-                
-                def __init__(self, System):
-                    if System == 'Storing':
+
+                def __init__(self, SystemType):
+                    if SystemType == 'Storing':
                         self.system = Storing
-                    if System == 'Member':
+                    if SystemType == 'Member':
                         self.system = Member
-                    if System == 'Employee':
+                    if SystemType == 'Employee':
                         self.system = Employee
-            
-                def list(self):
+
+                def ListAll(self):
+
                     cls(print_ctrl_c = True)
                     print('List all section')
-                    list = self.system.List()
-                    if list != False: print(tabulate(list, headers = 'firstrow', tablefmt = 'grid', showindex = True, missingval = 'N/A'))
+
+                    response = self.system.List()
+
+                    if response is not False:
+                        print(tabulate(
+                            response,
+                            headers = 'firstrow',
+                            tablefmt = 'grid',
+                            showindex = True,
+                            missingval = 'N/A'
+                            ))
+
                     input('Press >ENTER< to continue')
-                    return False
-                    
-                def search(self):
+                    return False # Return to main menu
+
+                def Search(self):
+
                     cls(print_ctrl_c = True)
                     print('Search section')
+
                     keywords = input('Provide any keywords or phrases (separate with commas): ').upper().split(',')
-                    list = self.system.Search(*keywords)
-                    if list != False: print(tabulate(list, headers = 'firstrow', tablefmt = 'grid', showindex = True, missingval = 'N/A'))
+                    response = self.system.Search(*keywords)
+
+                    if response is not False:
+                        print(tabulate(
+                            response,
+                            headers = 'firstrow',
+                            tablefmt = 'grid',
+                            showindex = True,
+                            missingval = 'N/A'
+                            ))
+
                     input('Press >ENTER< to continue')
-                    return False
-                    
-                def register(self):
+                    return False # Return to main menu
+
+                def _ModifyMain(self, ItemID):
+
+                    cls(print_ctrl_c = True)
+                    print('Modify section')
+
+                    response = self.system.List(ID = ItemID, Only_Modifiable = True)
+
+                    if response is not False:
+                        print(tabulate(
+                            response,
+                            headers = 'firstrow',
+                            tablefmt = 'grid',
+                            showindex = True,
+                            missingval = 'N/A'
+                            ))
+
+                    key = input('Variable you wish to modify: ')
+                    value = input('New value: ').upper()
+                    self.system(ItemID).Modify(key, value)
+
+                    input('Press >ENTER< to continue')
+
+                def Register(self):
+
                     cls(print_ctrl_c = True)
                     print('Register section')
-                    id = input('ID: ').upper()
-                    success = self.system(id).Register()
-                    
-                    if success != True:
+
+                    item_id = input('Item ID: ').upper()
+                    success = self.system(item_id).Register()
+
+                    if success is not True:
                         input('Press >ENTER< to continue')
-                        return True
-                        
+                        return True # Keep looping
+
                     # After register success, now can be able to modify the values
                     while True:
                         try:
-                            self.modify_main(id)
+                            self._ModifyMain(item_id)
                         except KeyboardInterrupt:
-                            break
-                    
-                    return True
-                        
-                def modify_main(self, id):
+                            return True # Keep looping
+
+
+                def Modify(self):
+
                     cls(print_ctrl_c = True)
                     print('Modify section')
-                    list = self.system.List(ID = id, Only_Modifiable = True)
-                    if list != False: print(tabulate(list, headers = 'firstrow', tablefmt = 'grid', missingval = 'N/A'))
-                    key = input('Variable you wish to modify: ')
-                    value = input('New value: ').upper()
-                    self.system(id).Modify(key, value)
-                    input('Press >ENTER< to continue')
-                    
-                def modify_head(self):
-                    cls(print_ctrl_c = True)
-                    print('Modify section')
-                    id = input('ID: ').upper()
-                    object = self.system(id)
-                    
-                    if object.valid_ID != True:
+
+                    item_id = input('Item ID: ').upper()
+                    item = self.system(item_id)
+
+                    if item.valid_ID is not True:
                         print('Invalid ID')
                         input('Press >ENTER< to continue')
-                        return True
-                        
+                        return True # Keep looping
+
                     while True:
                         try:
-                            self.modify_main(id)
+                            self._ModifyMain(item_id)
                         except KeyboardInterrupt:
                             break
-                        
-                    return False
-                    
-                def delete(self):
+
+                    return False # Return to main menu
+
+                def Delete(self):
+
                     cls(print_ctrl_c = True)
                     print('Deletion section')
-                    id = input('ID: ').upper()
-                    object = self.system(id)
-                    
-                    if object.valid_ID != True:
+
+                    item_id = input('Item ID: ').upper()
+                    item = self.system(item_id)
+
+                    if item.valid_ID is not True:
                         print('Invalid ID')
                         input('Press >ENTER< to continue')
-                        return True
-                    
-                    try: confirmation = strtobool(input(f'Are you sure you want to delete {id}? (y/N): '))
-                    except ValueError: return True
-                    
-                    if confirmation == True:
-                        object.Delete()
+                        return True # Keep looping
+
+                    try:
+                        confirmation = strtobool(
+                            input(f'Are you sure you want to delete {item_id}? (y/N): ')
+                            )
+                    except ValueError:
+                        return True # Keep looping
+
+                    if bool(confirmation) is True:
+                        item.Delete()
                         input('Press >ENTER< to continue')
-                        return True
-                    
-                    else: return True
-                
-                
+                        return True # Keep looping
+
+                    else: return True # Keep looping
+
+
             # ////////////////////////////////////////////////////////////
             #                       STORING SYSTEM
             # ////////////////////////////////////////////////////////////
-            
-            
+
+
             if index == 0:
-                
+                index = 0
+
                 def add_stock():
                     cls(print_ctrl_c = True)
                     print('Add Stock section')
@@ -228,7 +306,7 @@ def _main():
                     print('Stock ID:', Storing(book_id).AddStock())
                     input('Press >Enter< to continue')
                     return True
-                
+
                 def delete_stock():
                     cls(print_ctrl_c = True)
                     print('Delete Stock section')
@@ -236,7 +314,7 @@ def _main():
                     Storing(stock_id).DeleteStock()
                     input('Press >Enter< to continue')
                     return True
-                
+
                 def sell_stock():
                     result = Storing.SellStock(LOGIN_USER, JustCheckPriceOnly = True)
                     while True:
@@ -246,19 +324,20 @@ def _main():
                                 result[0],
                                 headers = 'firstrow',
                                 tablefmt = 'grid',
+                                showindex = True,
                                 missingval = 'N/A'
                                 ),
                             f'SUBTOTAL: {result[2]}',
                             sep = '\n'
                             )
                         stock_id = input('\nType "CONFIRM" to confirm the purchase\nStock ID: ').upper()
-                        
+
                         if stock_id != 'CONFIRM':
                             result[1].append(stock_id)
                             result = Storing.SellStock(LOGIN_USER, *result[1], JustCheckPriceOnly = True)
                             input('Press >Enter< to continue')
                             continue
-                        
+
                         cls()
                         result = Storing.SellStock(LOGIN_USER, *result[1], JustCheckPriceOnly = False)
                         print(
@@ -268,21 +347,22 @@ def _main():
                                 result[0],
                                 headers = 'firstrow',
                                 tablefmt = 'grid',
+                                showindex = True,
                                 missingval = 'N/A'
                                 ),
                             f'SUBTOTAL: {result[2]}',
                             '\nHave a nice day :)\n\n',
                             sep = '\n'
                             )
-                            
+
                         input('Press >Enter< to continue')
                         return False
-                
-                
+
+
                 while True:
-                    
-                    title = f'\t{"-" * 50}\n\tWelcome to Storing System, {LOGIN_USER}\n\t{"-" * 50}\n'
-                    
+
+                    title = f'\t{"-" * 50}\n\tWelcome to Storing System, {LOGIN_USER}\n\t{"-" * 50}'
+
                     options = [
                         '\tList',
                         '\tSearch',
@@ -293,91 +373,101 @@ def _main():
                         '\tDelete Stock',
                         '\tSell Stock'
                     ]
-                    
-                    try: option, index = pick(options, title, indicator = ' > ', print_ctrl_c = True)
+
+                    try:
+                        index = pick(
+                                options,
+                                title,
+                                indicator = ' > ',
+                                default_index = index,
+                                print_ctrl_c = True
+                                )[1]
+
                     except KeyboardInterrupt: break
-                    
+
                     list_functions = {
-                        0: Function('Storing').list,
-                        1: Function('Storing').search,
-                        2: Function('Storing').register,
-                        3: Function('Storing').modify_head,
-                        4: Function('Storing').delete,
+                        0: Function('Storing').ListAll,
+                        1: Function('Storing').Search,
+                        2: Function('Storing').Register,
+                        3: Function('Storing').Modify,
+                        4: Function('Storing').Delete,
                         5: add_stock,
                         6: delete_stock,
                         7: sell_stock
                     }
-                    
+
                     loop = True
-                    while loop == True:
+                    while loop is True:
                         try:
                             loop = list_functions.get(index)()
                         except KeyboardInterrupt:
                             break
-                    
-                    
+
+
             # ////////////////////////////////////////////////////////////
             #                       MEMBER SYSTEM
             # ////////////////////////////////////////////////////////////
-            
-            
+
+
             if index == 1:
-                
+                index = 0
+
                 def Borrow():
                     cls(print_ctrl_c = True)
                     print('Borrow section')
                     member_id = input('Member ID: ').upper()
-                    
-                    if Member(member_id).valid_ID != True:
+
+                    if Member(member_id).valid_ID is not True:
                         print('Invalid Member ID')
                         input('Press >ENTER< to continue')
                         return True
-                    
+
                     while True:
                         try:
                             cls(print_ctrl_c = True)
                             print(f'Member: {member_id}')
                             book_id = input('Book ID wish to borrow: ').upper()
-                            Storing(book_id).LendStock(MemberID = member_id)
+                            Storing(book_id).LendStock(MaximumBorrowAllowed, MemberID = member_id)
                             input('Press >Enter< to continue')
                         except KeyboardInterrupt: break
-                    
+
                     return True
-                
+
                 def Return():
                     cls(print_ctrl_c = True)
                     print('Return section')
                     book_id = input('Book ID: ').upper()
-                    
-                    Storing(book_id).ReturnStock()
+
+                    Storing(book_id).ReturnStock(PenaltyLateReturn = PenaltyLateReturn)
                     input('Press >ENTER< to continue')
                     return True
-                
+
                 def ListBorrowing():
                     cls(print_ctrl_c = True)
                     print('List member borrowing section')
                     member_id = input('Member ID: ').upper()
-                    
+
                     member = Member(member_id)
-                    if member.valid_ID != True:
+                    if member.valid_ID is not True:
                         print('Invalid Member ID')
                         input('Press >ENTER< to continue')
                         return True
-                    
-                    table = member.ListBorrowing()
+
+                    table = member.ListBorrowing(PenaltyLateReturn = PenaltyLateReturn)
                     print(tabulate(
                         table,
                         headers = 'firstrow',
                         tablefmt = 'grid',
+                        showindex = True,
                         missingval = 'N/A'
-                    ))
+                        ))
                     input('Press >Enter< to continue')
                     return True
-                
+
                 while True:
-                    
-                    title = f'\t{"-" * 50}\n\tWelcome to Member System, {LOGIN_USER}\n\t{"-" * 50}\n'
-                    
+
+                    title = f'\t{"-" * 50}\n\tWelcome to Member System, {LOGIN_USER}\n\t{"-" * 50}'
+
                     options = [
                         '\tList',
                         '\tSearch',
@@ -388,82 +478,111 @@ def _main():
                         '\tReturn book',
                         '\tList Borrowing (Include subtotal penalty)'
                     ]
-                    
-                    try: option, index = pick(options, title, indicator = ' > ', print_ctrl_c = True)
+
+                    try:
+                        index = pick(
+                                options,
+                                title,
+                                indicator = ' > ',
+                                default_index = index,
+                                print_ctrl_c = True
+                                )[1]
+
                     except KeyboardInterrupt: break
-            
-                    
+
+
                     list_functions = {
-                        0: Function('Member').list,
-                        1: Function('Member').search,
-                        2: Function('Member').register,
-                        3: Function('Member').modify_head,
-                        4: Function('Member').delete,
+                        0: Function('Member').ListAll,
+                        1: Function('Member').Search,
+                        2: Function('Member').Register,
+                        3: Function('Member').Modify,
+                        4: Function('Member').Delete,
                         5: Borrow,
                         6: Return,
                         7: ListBorrowing
                     }
-                    
+
                     loop = True
-                    while loop == True:
+                    while loop is True:
                         try:
                             loop = list_functions.get(index)()
                         except KeyboardInterrupt:
                             break
-                    
-                    
+
+
             # ////////////////////////////////////////////////////////////
             #                       EMPLOYEE SYSTEM
             # ////////////////////////////////////////////////////////////
-            
-            
+
+
             if index == 2:
-                
+                index = 0
+
                 while True:
-                    
-                    title = f'\t{"-" * 50}\n\tWelcome to Employee System, {LOGIN_USER}\n\t{"-" * 50}\n'
-                    
+
+                    title = f'\t{"-" * 50}\n\tWelcome to Employee System, {LOGIN_USER}\n\t{"-" * 50}'
+
                     options = [
                         '\tList',
                         '\tSearch',
                         '\tModify',
                         '\tDelete'
                     ]
-                    
-                    try: option, index = pick(options, title, indicator = ' > ', print_ctrl_c = True)
+
+                    try:
+                        index = pick(
+                                options,
+                                title,
+                                indicator = ' > ',
+                                default_index = index,
+                                print_ctrl_c = True,
+                                )[1]
+
                     except KeyboardInterrupt: break
-                    
+
                     list_functions = {
-                        0: Function('Employee').list,
-                        1: Function('Employee').search,
-                        2: Function('Employee').modify_head,
-                        3: Function('Employee').delete
+                        0: Function('Employee').ListAll,
+                        1: Function('Employee').Search,
+                        2: Function('Employee').Modify,
+                        3: Function('Employee').Delete
                     }
-                    
+
                     loop = True
-                    while loop == True:
+                    while loop is True:
                         try:
                             loop = list_functions.get(index)()
                         except KeyboardInterrupt:
                             break
-        
-        
+
+
     # ////////////////////////////////////////////////////////////
     #                       END OF PROGRAM
     # ////////////////////////////////////////////////////////////
-    
-    
-    
-    
-def main():
-    
+
+
+
+
+def main(
+    Flush: bool = True,
+    HashedPassword: bool = True,
+    MaximumBorrowAllowed: int = 5,
+    PenaltyLateReturn: float = 0.5,
+    PrintASCIIArt: bool = True
+):
+
     try:
-    
-        _main()
-            
+
+        return _main(
+            Flush,
+            HashedPassword,
+            MaximumBorrowAllowed,
+            PenaltyLateReturn,
+            PrintASCIIArt
+        )
+
     except KeyboardInterrupt: cls()
-    
-    except Exception as e:
+
+    except Exception:
         cls()
         logger = get_logger('SystemError')
         logger.error(traceback.format_exc())
@@ -472,25 +591,25 @@ def main():
             'next launch to prevent any loss of data\n\n',
             sep = '\n'
         )
-        
+
     finally:
-        
+
         def get_version():
             import re
-            
+
             SRC = os.path.abspath(os.path.dirname(__file__))
             PATH = os.path.join(SRC, '__init__.py')
-            
-            with open(PATH) as f:
+
+            with open(PATH, encoding = 'UTF-8') as f:
                 for line in f:
                     m = re.match("__version__ = '(.*)'", line)
                     if m:
                         return m.group(1)
-        
-        
+
+
         shutdown()
         try: print(f'\t\tVersion: {get_version()}')
-        except: print(f'\t\tVersion: FAILED TO GET VERSION')
+        except: print('\t\tVersion: FAILED TO GET VERSION')
         print(
             '\n\n\tData has been saved in the following path:',
             f'\t{Path().user_data_roaming_dir}\n',
@@ -500,10 +619,11 @@ def main():
             '\thttps://github.com/KimAssignment/Library-System/issues\n\n',
             sep = '\n'
         )
-        
-        input('\tPress >Enter< to exit\n\n')
-    
+
+        try: input('\tPress >Enter< to exit\n\n')
+        except KeyboardInterrupt: pass
+
 
 if __name__ == '__main__':
     main()
-    
+
