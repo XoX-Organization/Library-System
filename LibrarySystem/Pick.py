@@ -181,7 +181,7 @@ class Picker(
             init_title = ""
 
             if platform.system() == "Windows":
-                init_title += KNOWN_BUG
+                init_title += '\n' + KNOWN_BUG
 
             if self.print_ctrl_c:
                 init_title += "\n\tPress >CTRL+C< to return\n"
@@ -191,7 +191,7 @@ class Picker(
 
         elif not self.title and not self.print_ascii_art and not self.print_ctrl_c:
             if platform.system() == "Windows":
-                return (KNOWN_BUG).split("\n") + [""]
+                return ('\n' + KNOWN_BUG).split("\n") + [""]
             else:
                 return []
 
@@ -276,7 +276,8 @@ class Picker(
                 raise KeyboardInterrupt
             elif c in KEYS_RESIZE:
                 if platform.system() == "Windows":
-                    raise UserResizeTerminalException("Don't ever try to RESIZE THE TERMINAL !!!")
+                    pass # Nevermind them ...
+                    # raise UserResizeTerminalException("Don't ever try to RESIZE THE TERMINAL !!!")
             elif c in KEYS_UP:
                 self.move_up()
             elif c in KEYS_DOWN:
