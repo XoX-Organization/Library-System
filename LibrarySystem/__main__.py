@@ -1,7 +1,7 @@
 
 # Title : Library System
 # Programmer : Xian Yee
-# Version : 0.1.4-a1
+# Version : 0.1.4-a2
 
 
 import functools
@@ -14,7 +14,7 @@ from distutils.util import strtobool
 from getpass import getpass
 from tabulate import tabulate
 
-from .Constants import ASCII_ART
+from .Constants import ASCII_ART, KNOWN_BUG
 from .Employee import Employee
 from .Logging import get_logger, shutdown
 from .Member import Member
@@ -39,6 +39,9 @@ def cls(
     finally:
         if print_ascii_art is True:
             print('\n', ASCII_ART)
+
+        if os_name == 'Windows':
+            print('\n', KNOWN_BUG)
 
         if print_ctrl_c is True:
             print('\tPress >CTRL+C< back to menu\n')
@@ -563,12 +566,13 @@ def _main(
 
 
 def main(
-    Flush: bool = True,
-    HashedPassword: bool = True,
-    MaximumBorrowAllowed: int = 5,
-    PenaltyLateReturn: float = 0.5,
-    PrintASCIIArt: bool = True
+    Flush: bool = True,              # [Default: True], If flush = True, then the buffering of print statements will be disabled.
+    HashedPassword: bool = True,     # [Default: True], If true, the password will be stored in the hashed format, otherwise, the password will be stored in the plain text format
+    MaximumBorrowAllowed: int = 5,   # [Default: 5], A member can only borrow maximum 5 books at a time
+    PenaltyLateReturn: float = 0.5,  # [Default: 0.5], Penalty RM0.50 each day after due date
+    PrintASCIIArt: bool = True       # [Default: True], If true, the ASCII art will be printed every time after clear screen, see Constants.py for the art-looking
 ):
+
 
     try:
 

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+'''KNOWN BUGS:
+FOR WINDOWS USER: DON'T EVER TRY TO RESIZE THE TERMINAL WHILE RUNNING THE PROGRAM.
+                THIS WILL CAUSE THE PROGRAM TO PRINT OUT STATEMENTS IN WRONG POSITIONS
+'''
+
 from LibrarySystem.__main__ import main
 
 if __name__ == '__main__':
