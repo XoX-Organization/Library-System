@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 with open('README.md', 'r', encoding = 'UTF-8') as README :
     LongDescription = README.read()
-    
+
 SRC = os.path.abspath(os.path.dirname(__file__))
 PATH = os.path.join(SRC, 'LibrarySystem/__init__.py')
 
